@@ -4,12 +4,31 @@
   "description": "sick",
   "main": "index.js",
   "dependencies": {
+    "createjs": "^1.0.1",
     "express": "^4.16.3",
     "socket.io": "^2.1.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.1.0",
+    "@babel/preset-env": "^7.1.0",
+    "@types/createjs": "0.0.29",
+    "@types/easeljs": "^1.0.0",
+    "@types/express": "^4.16.0",
+    "@types/node": "^10.10.3",
+    "@types/socket.io": "^1.4.38",
+    "@types/socket.io-client": "^1.4.32",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.2",
+    "babel-preset-env": "^1.7.0",
+    "ts-loader": "^5.2.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.3",
+    "webpack": "^4.19.1",
+    "webpack-cli": "^3.1.1"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack && tsc && cp createjs.js dist/createjs.js",
+    "start": "node dist/server/index.js"
   },
   "author": "James Barty & Jeremie Gabor",
   "license": "ISC"
