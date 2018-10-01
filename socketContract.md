@@ -6,8 +6,12 @@ Server sends:
 - 'levelEnd'
 
 - 'levelStart'
-    - tanks: TankInfo[];
-    - walls: WallInfo[];'
+    - redTank: Tank;
+    - blueTank: Tank;
+    - tanks: Tank[];
+    - walls: Position[];
+    - height: number;
+    - width: number;
 
 - 'loseGame'
 
@@ -36,8 +40,9 @@ Structures:
 
 Tank
     - id: string;
-    - position: Position
-    - rotation: number;
+    - position: Position;
+    - rotationBase: number;
+    - rotationGun: number;
 
 Bullet
     - id: string;
