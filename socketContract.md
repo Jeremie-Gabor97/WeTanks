@@ -6,8 +6,12 @@ Server sends:
 - 'levelEnd'
 
 - 'levelStart'
+    - redTank: coordinates;
+    - blueTank: coordinates;
     - tanks: TankInfo[];
-    - walls: WallInfo[];'
+    - walls: WallInfo[];
+    - height: number;
+    - width: number;
 
 - 'loseGame'
 
