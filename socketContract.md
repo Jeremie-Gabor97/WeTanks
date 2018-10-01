@@ -6,10 +6,10 @@ Server sends:
 - 'levelEnd'
 
 - 'levelStart'
-    - redTank: coordinates;
-    - blueTank: coordinates;
-    - tanks: TankInfo[];
-    - walls: WallInfo[];
+    - redTank: Tank;
+    - blueTank: Tank;
+    - tanks: Tank[];
+    - walls: Position[];
     - height: number;
     - width: number;
 
@@ -40,8 +40,9 @@ Structures:
 
 Tank
     - id: string;
-    - position: Position
-    - rotation: number;
+    - position: Position;
+    - rotationBase: number;
+    - rotationGun: number;
 
 Bullet
     - id: string;
