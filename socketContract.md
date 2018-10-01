@@ -7,7 +7,9 @@ Server sends:
 
 - 'levelStart'
     - tanks: TankInfo[];
-    - walls: WallInfo[];
+    - walls: WallInfo[];'
+
+- 'loseGame'
 
 - 'mineCreated'
     - id: string;
