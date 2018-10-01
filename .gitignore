@@ -35,4 +35,5 @@ bower_components
 Thumbs.db
 
 # Ignore built ts files
-dist/**/*
+public/dist/**/*
+public/assets/**/*

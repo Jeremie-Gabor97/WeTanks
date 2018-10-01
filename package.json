@@ -27,8 +27,8 @@
     "webpack-cli": "^3.1.1"
   },
   "scripts": {
-    "build": "webpack && tsc && cp createjs.js dist/createjs.js",
-    "start": "node dist/server/index.js"
+    "build": "webpack && tsc && cp createjs.js public/createjs.js",
+    "start": "node public/dist/server/index.js"
   },
   "author": "James Barty & Jeremie Gabor",
   "license": "ISC"

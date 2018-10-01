@@ -10,10 +10,10 @@ const path = require('path');
 // const ioServer = require('socket.io')(http);
 const ioServer = socketIO(http);
 
-app.use(express.static('dist'));
+app.use(express.static('public'));
 
 app.get('/', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../../', 'index.html'));
+    res.sendFile(path.join(__dirname, '../../../', 'index.html'));
 });
 
 let socketId = 1;

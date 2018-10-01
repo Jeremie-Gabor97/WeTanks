@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-      "outDir": "./dist",
+      "outDir": "./public/dist",
       "allowJs": true,
       "noImplicitAny": true,
-      "strictNullChecks": true,
+      "strictNullChecks": false,
       "rootDir": "src",
       "target": "es6",
       "module": "commonjs",
