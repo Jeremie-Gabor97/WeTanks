@@ -9,8 +9,8 @@ module.exports = {
     entry: './src/client/index.ts',
 
     output: {
-        path: path.resolve(__dirname, 'dist/client'),
-        publicPath: '/dist/client',
+        path: path.resolve(__dirname, 'public/dist/client'),
+        publicPath: '/public/dist/client',
         filename: 'project.bundle.js'
     },
 
