@@ -23,6 +23,9 @@ Server sends:
 - 'mineDestroyed'
     - id: string;
 
+- 'playerId'
+    - id: string;
+
 Client sends:
 - 'key'
     - key: string

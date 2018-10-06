@@ -5,6 +5,8 @@
 
 // keep track of list of players and bullets to determine when one dies
 // when one dies play explosion animation at that location...
+import { throttle } from 'lodash';
+import KeyManager from './keys';
 
 type Dictionary<T> = {
     [index: string]: T;
@@ -41,6 +43,10 @@ interface IMine {
     position: Position;
 }
 
+interface IPlayerIdInfo {
+    id: string;
+}
+
 interface IUpdateInfo {
     tanks: ITank[];
     bullets: IBullet[];
@@ -53,11 +59,16 @@ interface ILevelInfo {
 
 class CreepsClient {
     stage: createjs.Stage;
+    canvas: HTMLCanvasElement;
     width: number;
     height: number;
     gameLoop: number;
     fps: number;
     socket: SocketIOClient.Socket;
+    mousePosition: Pos;
+    frameNum: number;
+    keyManager: KeyManager;
+    playerId: string;
 
     tankInfos: Dictionary<ITankInfo>;
     bulletInfos: Dictionary<IBullet>;
@@ -80,20 +91,21 @@ class CreepsClient {
 
     constructor() {
         this.socket = io();
-        const canvas = document.getElementById('theCanvas');
-        this.width = canvas.clientWidth;
-        this.height = canvas.clientHeight;
+        this.canvas = document.getElementById('theCanvas') as HTMLCanvasElement;
+        this.width = this.canvas.clientWidth;
+        this.height = this.canvas.clientHeight;
         console.log('width: ' + this.width);
         console.log('height: ' + this.height);
         this.stage = new createjs.Stage('theCanvas');
-        this.fps = 60;
+        this.fps = 30;
+        this.frameNum = 0;
+        this.keyManager = new KeyManager();
 
         this.attachSocketListeners();
+        this.attachEventListeners();
         this.initUi();
 
-        this.gameLoop = window.setInterval(() => {
-            this.stage.update();
-        }, 1000 / this.fps);
+        this.gameLoop = window.setInterval(this.tick, 1000 / this.fps);
 
         this.onLevelStart({
             tanks: [
@@ -116,6 +128,20 @@ class CreepsClient {
                 }
             ]
         });
+    }
+
+    tick = () => {
+        this.stage.update();
+        if (this.frameNum === 5) {
+            this.socket.emit('rotation', this.getPlayerRotation);
+        }
+        this.frameNum = (this.frameNum + 1) % 6;
+    }
+
+    getPlayerRotation() {
+        const mousePosition = this.mousePosition;
+        const playerPosition = this.tankInfos[this.playerId].position;
+        return Math.atan2(mousePosition.y - playerPosition.y, mousePosition.x - playerPosition.y);
     }
 
     initUi() {
@@ -152,6 +178,7 @@ class CreepsClient {
     }
 
     attachSocketListeners() {
+        this.socket.on('playerId', this.onPlayerId);
         this.socket.on('update', this.onUpdate);
         this.socket.on('levelEnd', this.onLevelEnd);
         this.socket.on('levelStart', this.onLevelStart);
@@ -159,18 +186,62 @@ class CreepsClient {
         this.socket.on('mineExpiring', this.onMineExpiring);
     }
 
+    attachEventListeners() {
+        this.canvas.addEventListener('mousemove', throttle(this.onMouseMove, 100));
+        this.canvas.addEventListener('click', this.onClick);
+        document.addEventListener('keydown', this.onKeyDown);
+        document.addEventListener('keyup', this.onKeyUp);
+    }
+
+    onMouseMove = (e: MouseEvent) => {
+        // console.log('emitting mouse move');
+        this.mousePosition = {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+    }
+
+    onClick = (e: MouseEvent) => {
+        this.socket.emit('click');
+        // console.log('emitting clicked');
+    }
+
+    onKeyDown = (e: KeyboardEvent) => {
+        if (this.keyManager.keyDown(e.key)) {
+            // console.log('emitting key down');
+            this.socket.emit('key', {
+                key: e.key,
+                isDown: true
+            });
+        }
+    }
+
+    onKeyUp = (e: KeyboardEvent) => {
+        this.keyManager.keyUp(e.key);
+        // console.log('emitting key up');
+        this.socket.emit('key', {
+            key: e.key,
+            isDown: false
+        });
+    }
+
+    onPlayerId(playerIdInfo: IPlayerIdInfo) {
+        console.log('receiving player id');
+        this.playerId = playerIdInfo.id;
+    }
+
     onUpdate(updateInfo: IUpdateInfo) {
         console.log('on update');
     }
 
     onLevelEnd() {
-        console.log('on level end');
+        console.log('receiving level end');
         this.overlayText.text = 'G-man would be proud. Onwards!';
         this.overlay.visible = true;
     }
 
     onLevelStart(levelInfo: ILevelInfo) {
-        console.log('on level start');
+        console.log('receiving level start');
         this.overlay.visible = false;
 
         this.tankInfos = {};
@@ -208,13 +279,13 @@ class CreepsClient {
     }
 
     onLoseGame() {
-        console.log('on lose game');
+        console.log('receiving lose game');
         this.overlayText.text = 'Get rekt mate...';
         this.overlay.visible = true;
     }
 
     onMineExpiring(id: string) {
-        console.log('on mine expiring');
+        console.log('receiving mine expiring');
     }
 
     getTankSpriteFromType(type: number) {
