@@ -4,6 +4,8 @@ import { NextFunction, Request, Response } from 'express';
 // const express = require('express');
 import * as socketIO from 'socket.io';
 
+import { Game } from './game';
+
 const app = express();
 const http = require('http').Server(app);
 const path = require('path');
@@ -16,13 +18,20 @@ app.get('/', (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, '../../', 'index.html'));
 });
 
-let socketId = 1;
+let players: socketIO.Socket[] = [];
 
 ioServer.on('connection', function (socket: socketIO.Socket) {
-    console.log('a user connected');
+    players.push(socket);
+    // console.log('a user connected');
     socket.on('disconnect', function () {
+        players = players.filter(obj => obj !== socket);
         console.log('user disconnected');
     });
+    if (players.length === 2) {
+        console.log('2 players have joined');
+        let game = new Game(players, ioServer);
+        game.newLevel();
+    }
 });
 
 // Start the server
