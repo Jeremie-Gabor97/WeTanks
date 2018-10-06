@@ -32,7 +32,6 @@ Client sends:
     - angle: number;
 
 - 'click'
-    - position: Position;
     - button: number;
 
 

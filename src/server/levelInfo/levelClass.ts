@@ -1,20 +1,28 @@
+import { Bullet } from '../bullet';
+import { Mine } from '../mine';
 import { Position } from '../tank';
 import { Tank } from '../tank';
 
 export class Level {
-    public redTank: Tank;
-    public blueTank: Tank;
+    public p1Tank: Tank;
+    public p2Tank: Tank;
     public height: Number;
     public width: Number;
-    public tankInfo: Tank[];
+    public enemyTanks: Tank[];
     public wallInfo: Position[];
+    public bullets: Bullet[];
+    public mines: Mine[];
+    public bulletCount: number;
+    public mineCount: number;
 
-    constructor(redTank: Tank, blueTank: Tank, height: Number, width: Number, tankInfo: Tank[], wallInfo: Position[]) {
-        this.redTank = redTank;
-        this.blueTank = blueTank;
+    constructor(p1Tank: Tank, p2Tank: Tank, height: Number, width: Number, tankInfo: Tank[], wallInfo: Position[]) {
+        this.p1Tank = p1Tank;
+        this.p2Tank = p2Tank;
         this.height = height;
         this.width = width;
-        this.tankInfo = tankInfo;
+        this.enemyTanks = tankInfo;
         this.wallInfo = wallInfo;
+        this.bulletCount = 0;
+        this.mineCount = 0;
     }
 }
