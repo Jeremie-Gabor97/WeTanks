@@ -1,14 +1,13 @@
 export class Tank {
     public id: string;
-    public type: string;
+    public type: number;
     public position: Position;
     public rotationGun: number;
     public rotationBase: number;
     public bulletsActive: number;
     public minesActive: number;
 
-
-    constructor(id: string, position: Position, rotationGun: number, rotationBase: number, type: string) {
+    constructor(id: string, position: Position, rotationGun: number, rotationBase: number, type: number) {
         this.id = id;
         this.type = type;
         this.position = position;

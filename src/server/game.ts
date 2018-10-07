@@ -11,6 +11,7 @@ export class Game {
     private player1: socketIO.Socket;
     private player2: socketIO.Socket;
     private levelNum: number;
+    private levelState: Level;
     
     constructor(players: socketIO.Socket[], ioServer: socketIO.Server) {
         this.ioServer = ioServer;
@@ -19,67 +20,81 @@ export class Game {
         this.levelNum = 1;
     }
 
+    attachSocketListeners() {
+        this.player1.on('key', this.onPlayer1Key);
+        this.player1.on('rotation', this.onPlayer1Rotation);
+        this.player1.on('click', this.onPlayer1Click);
+        this.player2.on('key', this.onPlayer2Key);
+        this.player2.on('rotation', this.onPlayer2Rotation);
+        this.player2.on('click', this.onPlayer2Click);
+    }
+
     public newLevel(): void {
         // Pre game set up if we want
-        let levelInfo = levels[this.levelNum - 1];
+        this.levelState = levels[this.levelNum - 1];
         this.ioServer.emit('levelStart',
-         {  'player1Tank': levelInfo.p1Tank,
-            'player2Tank': levelInfo.p2Tank,
-            'tanks': levelInfo.enemyTanks,
-            'walls': levelInfo.wallInfo,
-            'height': levelInfo.height,
-            'width': levelInfo.width
+         {  'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
+            'walls': this.levelState.wallInfo,
+            'height': this.levelState.height,
+            'width': this.levelState.width
          }
         );
         console.log('setup method');
-        this.gameLoop(levelInfo);
+        this.gameLoop();
     }
 
-    private gameLoop(levelState: Level): void {
-        this.player1.on( 'click', function(msg: any) {
-            if (msg.button === 1) {
-                levelState.bulletCount += 1;
-                levelState.p1Tank.bulletsActive += 1;
-                levelState.bullets.push(new Bullet(levelState.p1Tank.rotationGun, levelState.p1Tank.position,
-                     levelState.p1Tank, 0, String(levelState.bulletCount)));
-            } else {
-                levelState.mineCount += 1;
-                levelState.p1Tank.minesActive += 1;
-                levelState.mines.push(new Mine(levelState.p1Tank.position, levelState.p1Tank, String(levelState.mineCount)));
-            }
-        });
-        this.player2.on( 'click', function(msg: any) {
-            if (msg.button === 1) {
-                levelState.bulletCount += 1;
-                levelState.p2Tank.bulletsActive += 1;
-                levelState.bullets.push(new Bullet(levelState.p2Tank.rotationGun, levelState.p2Tank.position,
-                     levelState.p2Tank, 0, String(levelState.bulletCount)));
-            } else {
-                levelState.mineCount += 1;
-                levelState.p2Tank.minesActive += 1;
-                levelState.mines.push(new Mine(levelState.p2Tank.position, levelState.p2Tank, String(levelState.mineCount)));
-            }
-        });
-        this.player1.on( 'rotation', function (msg: any) {
-            levelState.p1Tank.rotationGun = msg.angle;
-        });
-        this.player2.on( 'rotation', function (msg: any) {
-            levelState.p2Tank.rotationGun = msg.angle;
-        });
-        this.player1.on( 'key', function (msg: any) {
-            levelState.p1Tank.rotationBase = msg.angle;
-        }); 
-        this.player2.on( 'key', function (msg: any) {
-            levelState.p2Tank.rotationBase = msg.angle;
-        });
+    onPlayer1Click = (clickInfo: any) => {
+        if (clickInfo.button === 0) {
+            this.levelState.bulletCount += 1;
+            this.levelState.p1Tank.bulletsActive += 1;
+            this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.position,
+                     this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));    
+        } else {
+            this.levelState.mineCount += 1;
+            this.levelState.p1Tank.minesActive += 1;
+            this.levelState.mines.push(new Mine(this.levelState.p1Tank.position, this.levelState.p1Tank, String(this.levelState.mineCount)));
+        }
+    }
+
+    onPlayer2Click = (clickInfo: any) => {
+        if (clickInfo.button === 0) {
+            this.levelState.bulletCount += 1;
+            this.levelState.p2Tank.bulletsActive += 1;
+            this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.position,
+                    this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
+        } else {
+            this.levelState.mineCount += 1;
+            this.levelState.p2Tank.minesActive += 1;
+            this.levelState.mines.push(new Mine(this.levelState.p2Tank.position, this.levelState.p2Tank, String(this.levelState.mineCount)));
+        }
+
+    }
+
+    onPlayer1Rotation = (rotationInfo: any) => {
+        this.levelState.p1Tank.rotationGun = rotationInfo.angle;
+    }
+
+    onPlayer2Rotation = (rotationInfo: any) => {
+        this.levelState.p2Tank.rotationGun = rotationInfo.angle;
+    }
+
+    onPlayer1Key = (directionInfo: any) => {
+        this.levelState.p1Tank.rotationBase = directionInfo.angle;
+    }
+
+    onPlayer2Key = (directionInfo: any) => {
+        this.levelState.p2Tank.rotationBase = directionInfo.angle;
+    }
+
+    private gameLoop(): void {
         this.ioServer.emit('update',
-         {  'tanks': levelState.enemyTanks.push(levelState.p1Tank, levelState.p2Tank);
-            'bullets': levelState.bullets
+         {  'tanks': this.levelState.enemyTanks.push(this.levelState.p1Tank, this.levelState.p2Tank),
+            'bullets': this.levelState.bullets
          });
-        if (levelState.enemyTanks.length === 0) {
+        if (this.levelState.enemyTanks.length === 0) {
              this.ioServer.emit('levelEnd');
         } else {
-            this.gameLoop(levelState);    
+            this.gameLoop();    
         }
     }
 

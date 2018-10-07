@@ -6,8 +6,6 @@ Server sends:
 - 'levelEnd'
 
 - 'levelStart'
-    - redTank: Tank;
-    - blueTank: Tank;
     - tanks: Tank[];
     - walls: Position[];
     - height: number;
