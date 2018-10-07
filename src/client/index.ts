@@ -21,7 +21,7 @@ type Pos = {
 interface ITank {
     id: string;
     position: Pos;
-    rotation: number;
+    rotationBase: number;
 }
 
 interface ITankInfo extends ITank {
@@ -66,7 +66,7 @@ const fakeUpdate: IUpdateInfo = {
                 x: 40,
                 y: 40
             },
-            rotation: Math.PI
+            rotationBase: Math.PI
         },
         {
             id: '8',
@@ -74,7 +74,7 @@ const fakeUpdate: IUpdateInfo = {
                 x: 100,
                 y: 100
             },
-            rotation: -Math.PI / 2
+            rotationBase: -Math.PI / 2
         }
     ],
     bullets: []
@@ -138,7 +138,7 @@ class CreepsClient {
                         x: 0,
                         y: 0
                     },
-                    rotation: Math.PI / 4,
+                    rotationBase: Math.PI / 4,
                     type: 0
                 },
                 {
@@ -147,7 +147,7 @@ class CreepsClient {
                         x: 32,
                         y: 32
                     },
-                    rotation: 3 * Math.PI / 4,
+                    rotationBase: 3 * Math.PI / 4,
                     type: 1
                 }
             ],
@@ -288,11 +288,11 @@ class CreepsClient {
             const info = this.tankInfos[tank.id];
             if (info) {
                 info.position = tank.position;
-                info.rotation = Degrees(tank.rotation);
+                info.rotationBase = Degrees(tank.rotationBase);
                 const sprite = this.tankSprites[tank.id];
                 sprite.x = info.position.x;
                 sprite.y = info.position.y;
-                sprite.rotation = info.rotation * -1;
+                sprite.rotation = info.rotationBase * -1;
             }
         });
 
@@ -356,7 +356,7 @@ class CreepsClient {
             tankSprite.regY = 16;
             tankSprite.x = tank.position.x;
             tankSprite.y = tank.position.y;
-            tankSprite.rotation = Degrees(tank.rotation) * -1;
+            tankSprite.rotation = Degrees(tank.rotationBase) * -1;
             this.tankSprites[tank.id] = tankSprite;
             this.tanksContainer.addChild(tankSprite);
         });
