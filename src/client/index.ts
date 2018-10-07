@@ -225,16 +225,58 @@ class CreepsClient {
         });
     }
 
-    onPlayerId(playerIdInfo: IPlayerIdInfo) {
+    onPlayerId = (playerIdInfo: IPlayerIdInfo) => {
         console.log('receiving player id');
         this.playerId = playerIdInfo.id;
     }
 
-    onUpdate(updateInfo: IUpdateInfo) {
+    onUpdate = (updateInfo: IUpdateInfo) => {
         console.log('on update');
+
+        const newTankIds = updateInfo.tanks.map(tank => tank.id);
+        const oldTankIds = Object.keys(this.tankInfos);
+        oldTankIds.forEach((id) => {
+            if (newTankIds.indexOf(id) < 0) {
+                // this tank real dead
+                this.tankInfos[id] = null;
+                delete this.tankInfos[id];
+                this.tanksContainer.removeChild(this.tankSprites[id]);
+                this.tankSprites[id] = null;
+                delete this.tankSprites[id];
+            }
+        });
+
+        updateInfo.tanks.forEach((tank) => {
+            const info = this.tankInfos[tank.id];
+            if (info) {
+                info.position = tank.position;
+                info.rotation = tank.rotation;
+            }
+        });
+
+        const newBulletIds = updateInfo.bullets.map(bullet => bullet.id);
+        const oldBulletIds = Object.keys(this.bulletInfos);
+        oldBulletIds.forEach((id) => {
+            if (newBulletIds.indexOf(id) < 0) {
+                // this bullet real dead
+                this.bulletInfos[id] = null;
+                delete this.bulletInfos[id];
+                this.bulletsContainer.removeChild(this.bulletSprites[id]);
+                this.bulletSprites[id] = null;
+                delete this.bulletSprites[id];
+            }
+        });
+
+        updateInfo.bullets.forEach((bullet) => {
+            const info = this.bulletInfos[bullet.id];
+            if (info) {
+                info.position = bullet.position;
+                info.rotation = bullet.rotation;
+            }
+        });
     }
 
-    onLevelEnd() {
+    onLevelEnd = () => {
         console.log('receiving level end');
         this.overlayText.text = 'G-man would be proud. Onwards!';
         this.overlay.visible = true;
@@ -278,13 +320,13 @@ class CreepsClient {
         });
     }
 
-    onLoseGame() {
+    onLoseGame = () => {
         console.log('receiving lose game');
         this.overlayText.text = 'Get rekt mate...';
         this.overlay.visible = true;
     }
 
-    onMineExpiring(id: string) {
+    onMineExpiring = (id: string) => {
         console.log('receiving mine expiring');
     }
 
