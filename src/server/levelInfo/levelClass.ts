@@ -7,8 +7,8 @@ import { Wall } from '../wall';
 export class Level {
     public p1Tank: Tank;
     public p2Tank: Tank;
-    public height: Number;
-    public width: Number;
+    public height: number;
+    public width: number;
     public enemyTanks: Tank[];
     public wallInfo: Wall[];
     public bullets: Bullet[];
@@ -16,7 +16,7 @@ export class Level {
     public bulletCount: number;
     public mineCount: number;
 
-    constructor(p1Tank: Tank, p2Tank: Tank, height: Number, width: Number, tankInfo: Tank[], wallInfo: Wall[]) {
+    constructor(p1Tank: Tank, p2Tank: Tank, height: number, width: number, tankInfo: Tank[], wallInfo: Wall[]) {
         this.p1Tank = p1Tank;
         this.p2Tank = p2Tank;
         this.height = height;
@@ -25,5 +25,7 @@ export class Level {
         this.wallInfo = wallInfo;
         this.bulletCount = 0;
         this.mineCount = 0;
+        this.bullets = [];
+        this.mines = [];
     }
 }

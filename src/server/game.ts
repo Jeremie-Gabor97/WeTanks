@@ -106,6 +106,15 @@ export class Game {
         if (this.levelState.p2Tank.targetDirectionBase !== this.levelState.p2Tank.rotationBase) {
             this.levelState.p2Tank.adjustBaseOrientation();
         }
+        if (this.levelState.p1Tank.keysPushed.length !== 0) {
+            this.levelState.p1Tank.updatePosition(this.levelState.width, this.levelState.height);
+        }
+        if (this.levelState.p2Tank.keysPushed.length !== 0) {
+            this.levelState.p2Tank.updatePosition(this.levelState.width, this.levelState.height);
+        }
+        this.levelState.bullets.forEach(bullet => {
+            bullet.updatePosition(this.levelState.width, this.levelState.height);
+        });
         this.ioServer.emit('update',
             {
                 'tanks': this.levelState.enemyTanks.push(this.levelState.p1Tank, this.levelState.p2Tank),

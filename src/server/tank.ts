@@ -10,8 +10,9 @@ export class Tank {
     public bulletsActive: number;
     public minesActive: number;
     public keysPushed: string[];
+    public allowedBounces: number;
 
-    constructor(id: string, position: Position, rotationGun: number, rotationBase: number, type: number) {
+    constructor(id: string, position: Position, rotationGun: number, rotationBase: number, type: number, allowedBounces: number) {
         this.id = id;
         this.type = type;
         this.position = position;
@@ -20,6 +21,8 @@ export class Tank {
         this.targetDirectionBase = 0;
         this.bulletsActive = 0;
         this.minesActive = 0;
+        this.keysPushed = [];
+        this.allowedBounces = allowedBounces;
     }
 
     private getDegrees(direction: string) {
@@ -87,11 +90,28 @@ export class Tank {
     public adjustBaseOrientation() {
         this.rotationBase += Math.PI / 180;
     }
+
+    public updatePosition(width: number, height: number) {
+        // distance travelled in one update
+        let distance =  2;
+        this.position.x = Math.cos(this.rotationBase) * distance;
+        this.position.y = Math.sin(this.rotationBase) * distance;
+        if (this.position.x < 0) {
+            this.position.x = 0;
+        } else if (this.position.x > width) {
+            this.position.x = width;
+        }
+        if (this.position.y < 0) {
+            this.position.y = 0;
+        } else if (this.position.y > height) {
+            this.position.y = height;
+        }
+    }
 }
 
 export class Position {
-    private x: number;
-    private y: number;
+    public x: number;
+    public y: number;
 
     constructor(x: number, y: number) {
         this.x = x;
