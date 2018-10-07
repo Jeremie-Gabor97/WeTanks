@@ -1,4 +1,5 @@
 import * as socketIO from 'socket.io';
+import { Key } from 'ts-key-enum';
 import { Bullet } from './bullet';
 import { levels } from './levelInfo/allLevels';
 import { level1 } from './levelInfo/Level1';
@@ -12,7 +13,7 @@ export class Game {
     private player2: socketIO.Socket;
     private levelNum: number;
     private levelState: Level;
-    
+
     constructor(players: socketIO.Socket[], ioServer: socketIO.Server) {
         this.ioServer = ioServer;
         this.player1 = players[0]; // is a socket
@@ -33,14 +34,16 @@ export class Game {
         // Pre game set up if we want
         this.levelState = levels[this.levelNum - 1];
         this.ioServer.emit('levelStart',
-         {  'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
-            'walls': this.levelState.wallInfo,
-            'height': this.levelState.height,
-            'width': this.levelState.width
-         }
+            {
+                'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
+                'walls': this.levelState.wallInfo,
+                'height': this.levelState.height,
+                'width': this.levelState.width
+            }
         );
+        console.log(this.levelState.p1Tank.id);
         console.log('setup method');
-        this.gameLoop();
+        setInterval(this.gameLoop, 1000 / 30);
     }
 
     onPlayer1Click = (clickInfo: any) => {
@@ -48,7 +51,7 @@ export class Game {
             this.levelState.bulletCount += 1;
             this.levelState.p1Tank.bulletsActive += 1;
             this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.position,
-                     this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));    
+                this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));
         } else {
             this.levelState.mineCount += 1;
             this.levelState.p1Tank.minesActive += 1;
@@ -61,7 +64,7 @@ export class Game {
             this.levelState.bulletCount += 1;
             this.levelState.p2Tank.bulletsActive += 1;
             this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.position,
-                    this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
+                this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
         } else {
             this.levelState.mineCount += 1;
             this.levelState.p2Tank.minesActive += 1;
@@ -79,25 +82,39 @@ export class Game {
     }
 
     onPlayer1Key = (directionInfo: any) => {
-        this.levelState.p1Tank.rotationBase = directionInfo.angle;
+        if (directionInfo.isDown === true) {
+            this.levelState.p1Tank.keysPushed.unshift(directionInfo.Key);
+        } else {
+            this.levelState.p1Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
+        }
+        this.levelState.p1Tank.setTargetDirection();
     }
 
     onPlayer2Key = (directionInfo: any) => {
-        this.levelState.p2Tank.rotationBase = directionInfo.angle;
-    }
-
-    private gameLoop(): void {
-        this.ioServer.emit('update',
-         {  'tanks': this.levelState.enemyTanks.push(this.levelState.p1Tank, this.levelState.p2Tank),
-            'bullets': this.levelState.bullets
-         });
-        if (this.levelState.enemyTanks.length === 0) {
-             this.ioServer.emit('levelEnd');
+        if (directionInfo.isDown === true) {
+            this.levelState.p2Tank.keysPushed.unshift(directionInfo.Key);
         } else {
-            this.gameLoop();    
+            this.levelState.p2Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
         }
+        this.levelState.p2Tank.setTargetDirection();
     }
 
-    // https://divillysausages.com/2015/07/12/an-intro-to-socket-io/
-    // https://blog.harveydelaney.com/creating-a-game-using-html5-canvas-typescript-and-webpack/
-}
+    gameLoop = () => {
+        if (this.levelState.p1Tank.targetDirectionBase !== this.levelState.p1Tank.rotationBase) {
+            this.levelState.p1Tank.adjustBaseOrientation();
+        }
+        if (this.levelState.p2Tank.targetDirectionBase !== this.levelState.p2Tank.rotationBase) {
+            this.levelState.p2Tank.adjustBaseOrientation();
+        }
+        this.ioServer.emit('update',
+            {
+                'tanks': this.levelState.enemyTanks.push(this.levelState.p1Tank, this.levelState.p2Tank),
+                'bullets': this.levelState.bullets
+            });
+    }
+
+        // https://divillysausages.com/2015/07/12/an-intro-to-socket-io/
+        // https://blog.harveydelaney.com/creating-a-game-using-html5-canvas-typescript-and-webpack/
+        // interesting read about timing of updates
+        // https://isaacsukin.com/news/2015/01/detailed-explanation-javascript-game-loops-and-timing
+    }
