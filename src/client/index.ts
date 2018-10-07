@@ -7,6 +7,7 @@
 // when one dies play explosion animation at that location...
 import { throttle } from 'lodash';
 import KeyManager from './keys';
+import { Degrees } from './utils';
 
 type Dictionary<T> = {
     [index: string]: T;
@@ -33,14 +34,14 @@ interface IWallInfo {
 
 interface IBullet {
     id: string;
-    position: Position;
+    position: Pos;
     rotation: number;
     type: number;
 }
 
 interface IMine {
     id: string;
-    position: Position;
+    position: Pos;
 }
 
 interface IPlayerIdInfo {
@@ -56,6 +57,28 @@ interface ILevelInfo {
     tanks: ITankInfo[];
     walls: IWallInfo[];
 }
+
+const fakeUpdate: IUpdateInfo = {
+    tanks: [
+        {
+            id: '7',
+            position: {
+                x: 40,
+                y: 40
+            },
+            rotation: Math.PI
+        },
+        {
+            id: '8',
+            position: {
+                x: 100,
+                y: 100
+            },
+            rotation: -Math.PI / 2
+        }
+    ],
+    bullets: []
+};
 
 class CreepsClient {
     stage: createjs.Stage;
@@ -112,11 +135,20 @@ class CreepsClient {
                 {
                     id: '7',
                     position: {
-                        x: 50,
-                        y: 50
+                        x: 0,
+                        y: 0
                     },
-                    rotation: 0,
+                    rotation: Math.PI / 4,
                     type: 0
+                },
+                {
+                    id: '8',
+                    position: {
+                        x: 32,
+                        y: 32
+                    },
+                    rotation: 3 * Math.PI / 4,
+                    type: 1
                 }
             ],
             walls: [
@@ -213,6 +245,10 @@ class CreepsClient {
                 key: e.key,
                 isDown: true
             });
+
+            if (e.key === 'a') {
+                this.onUpdate(fakeUpdate);
+            }
         }
     }
 
@@ -233,6 +269,7 @@ class CreepsClient {
     onUpdate = (updateInfo: IUpdateInfo) => {
         console.log('on update');
 
+        // Remove old tanks
         const newTankIds = updateInfo.tanks.map(tank => tank.id);
         const oldTankIds = Object.keys(this.tankInfos);
         oldTankIds.forEach((id) => {
@@ -246,14 +283,20 @@ class CreepsClient {
             }
         });
 
+        // Update existing tanks
         updateInfo.tanks.forEach((tank) => {
             const info = this.tankInfos[tank.id];
             if (info) {
                 info.position = tank.position;
-                info.rotation = tank.rotation;
+                info.rotation = Degrees(tank.rotation);
+                const sprite = this.tankSprites[tank.id];
+                sprite.x = info.position.x;
+                sprite.y = info.position.y;
+                sprite.rotation = info.rotation * -1;
             }
         });
 
+        // Remove old bullets
         const newBulletIds = updateInfo.bullets.map(bullet => bullet.id);
         const oldBulletIds = Object.keys(this.bulletInfos);
         oldBulletIds.forEach((id) => {
@@ -267,11 +310,16 @@ class CreepsClient {
             }
         });
 
+        // Update existing bullets
         updateInfo.bullets.forEach((bullet) => {
             const info = this.bulletInfos[bullet.id];
             if (info) {
                 info.position = bullet.position;
-                info.rotation = bullet.rotation;
+                info.rotation = Degrees(bullet.rotation);
+                const sprite = this.bulletSprites[bullet.id];
+                sprite.x = info.position.x;
+                sprite.y = info.position.y;
+                sprite.rotation = info.rotation * -1;
             }
         });
     }
@@ -304,8 +352,11 @@ class CreepsClient {
         levelInfo.tanks.forEach(tank => {
             this.tankInfos[tank.id] = tank;
             const tankSprite = new createjs.Bitmap(this.getTankSpriteFromType(tank.type));
+            tankSprite.regX = 16;
+            tankSprite.regY = 16;
             tankSprite.x = tank.position.x;
             tankSprite.y = tank.position.y;
+            tankSprite.rotation = Degrees(tank.rotation) * -1;
             this.tankSprites[tank.id] = tankSprite;
             this.tanksContainer.addChild(tankSprite);
         });
@@ -313,6 +364,8 @@ class CreepsClient {
         levelInfo.walls.forEach(wall => {
             this.wallInfos.push(wall);
             const wallSprite = new createjs.Bitmap('assets/wall.png');
+            wallSprite.regX = 16;
+            wallSprite.regY = 16;
             wallSprite.x = wall.position.x;
             wallSprite.y = wall.position.y;
             this.wallSprites.push(wallSprite);
