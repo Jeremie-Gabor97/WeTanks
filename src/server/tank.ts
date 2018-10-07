@@ -54,13 +54,14 @@ export class Tank {
     private degreesToRadians (degrees: number) {
         let rad = degrees * Math.PI / 180;
         // make sure rad value is between -pi and +pi
-        if (rad > Math.PI) {
-            return rad - 2 * Math.PI;
-        } else if (rad < -Math.PI) {
-            return rad + 2 * Math.PI;
-        } else {
-            return rad;
+        while (rad > Math.PI || rad < -Math.PI) {
+            if (rad > Math.PI) {
+                rad -= 2 * Math.PI;
+            } else if (rad < -Math.PI) {
+                rad += 2 * Math.PI;
+            }
         }
+        return rad;
     }
 
     public setTargetDirection() {
@@ -88,14 +89,14 @@ export class Tank {
     }
 
     public adjustBaseOrientation() {
-        this.rotationBase += Math.PI / 180;
+        this.rotationBase += 1 * (Math.PI / 180);
     }
 
     public updatePosition(width: number, height: number) {
         // distance travelled in one update
-        let distance =  2;
-        this.position.x = Math.cos(this.rotationBase) * distance;
-        this.position.y = Math.sin(this.rotationBase) * distance;
+        let distance = 1;
+        this.position.x += Math.cos(this.rotationBase) * distance;
+        this.position.y += Math.sin(this.rotationBase) * distance;
         if (this.position.x < 0) {
             this.position.x = 0;
         } else if (this.position.x > width) {

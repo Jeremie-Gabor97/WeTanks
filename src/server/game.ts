@@ -19,6 +19,7 @@ export class Game {
         this.player1 = players[0]; // is a socket
         this.player2 = players[1]; // is a socket
         this.levelNum = 1;
+        this.attachSocketListeners();
     }
 
     attachSocketListeners() {
@@ -82,18 +83,20 @@ export class Game {
     }
 
     onPlayer1Key = (directionInfo: any) => {
-        if (directionInfo.isDown === true) {
+        let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
+        if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
             this.levelState.p1Tank.keysPushed.unshift(directionInfo.Key);
-        } else {
+        } else if (directions.indexOf(directionInfo.key) > -1) {
             this.levelState.p1Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
         }
         this.levelState.p1Tank.setTargetDirection();
     }
 
     onPlayer2Key = (directionInfo: any) => {
-        if (directionInfo.isDown === true) {
+        let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
+        if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
             this.levelState.p2Tank.keysPushed.unshift(directionInfo.Key);
-        } else {
+        } else if (directions.indexOf(directionInfo.key) > -1) {
             this.levelState.p2Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
         }
         this.levelState.p2Tank.setTargetDirection();
@@ -117,7 +120,7 @@ export class Game {
         });
         this.ioServer.emit('update',
             {
-                'tanks': this.levelState.enemyTanks.push(this.levelState.p1Tank, this.levelState.p2Tank),
+                'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
                 'bullets': this.levelState.bullets
             });
     }
