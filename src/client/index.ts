@@ -330,7 +330,7 @@ class CreepsClient {
         this.overlay.visible = true;
     }
 
-    onLevelStart(levelInfo: ILevelInfo) {
+    onLevelStart = (levelInfo: ILevelInfo) => {
         console.log('receiving level start');
         this.overlay.visible = false;
 
