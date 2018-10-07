@@ -7,6 +7,8 @@ export class Bullet {
     private position: Position;
     private type: number;
     private tank: Tank;
+    private bounces: number;
+
 
     constructor(rotation: number, position: Position, tank: Tank, type: number, id: string) {
         this.rotation = rotation;
@@ -14,5 +16,13 @@ export class Bullet {
         this.tank = tank;
         this.type = type;
         this.id = id;
+        this.bounces = 0;
+    }
+
+    public updatePosition(width: number, height: number) {
+        // distance travelled in one update
+        let distance =  2;
+        this.position.x = Math.cos(this.rotation) * distance;
+        this.position.y = Math.sin(this.rotation) * distance;
     }
 }
