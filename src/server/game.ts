@@ -1,3 +1,5 @@
+import { clone } from 'lodash';
+import { cloneDeep } from 'lodash';
 import * as socketIO from 'socket.io';
 import { Key } from 'ts-key-enum';
 import { Bullet } from './bullet';
@@ -29,11 +31,17 @@ export class Game {
         this.player2.on('key', this.onPlayer2Key);
         this.player2.on('rotation', this.onPlayer2Rotation);
         this.player2.on('click', this.onPlayer2Click);
+        this.player1.on('reset', this.reset);
+        this.player2.on('reset', this.reset);
+    }
+
+    reset = () => {
+        this.newLevel();
     }
 
     public newLevel(): void {
         // Pre game set up if we want
-        this.levelState = levels[this.levelNum - 1];
+        this.levelState = cloneDeep(levels[this.levelNum - 1]);
         this.ioServer.emit('levelStart',
             {
                 'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
@@ -51,12 +59,12 @@ export class Game {
         if (clickInfo.button === 0) {
             this.levelState.bulletCount += 1;
             this.levelState.p1Tank.bulletsActive += 1;
-            this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.position,
+            this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, clone(this.levelState.p1Tank.position),
                 this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));
         } else {
             this.levelState.mineCount += 1;
             this.levelState.p1Tank.minesActive += 1;
-            this.levelState.mines.push(new Mine(this.levelState.p1Tank.position, this.levelState.p1Tank, String(this.levelState.mineCount)));
+            this.levelState.mines.push(new Mine(clone(this.levelState.p1Tank.position), this.levelState.p1Tank, String(this.levelState.mineCount)));
         }
     }
 
@@ -64,12 +72,12 @@ export class Game {
         if (clickInfo.button === 0) {
             this.levelState.bulletCount += 1;
             this.levelState.p2Tank.bulletsActive += 1;
-            this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.position,
+            this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, clone(this.levelState.p2Tank.position),
                 this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
         } else {
             this.levelState.mineCount += 1;
             this.levelState.p2Tank.minesActive += 1;
-            this.levelState.mines.push(new Mine(this.levelState.p2Tank.position, this.levelState.p2Tank, String(this.levelState.mineCount)));
+            this.levelState.mines.push(new Mine(clone(this.levelState.p2Tank.position), this.levelState.p2Tank, String(this.levelState.mineCount)));
         }
 
     }
