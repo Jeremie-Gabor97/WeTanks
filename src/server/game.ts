@@ -85,9 +85,9 @@ export class Game {
     onPlayer1Key = (directionInfo: any) => {
         let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
         if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
-            this.levelState.p1Tank.keysPushed.unshift(directionInfo.Key);
+            this.levelState.p1Tank.keysPushed.unshift(directionInfo.key);
         } else if (directions.indexOf(directionInfo.key) > -1) {
-            this.levelState.p1Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
+            this.levelState.p1Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.key), 1 );
         }
         this.levelState.p1Tank.setTargetDirection();
     }
@@ -95,23 +95,27 @@ export class Game {
     onPlayer2Key = (directionInfo: any) => {
         let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
         if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
-            this.levelState.p2Tank.keysPushed.unshift(directionInfo.Key);
+            this.levelState.p2Tank.keysPushed.unshift(directionInfo.key);
         } else if (directions.indexOf(directionInfo.key) > -1) {
-            this.levelState.p2Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
+            this.levelState.p2Tank.keysPushed.splice( this.levelState.p2Tank.keysPushed.indexOf(directionInfo.key), 1 );
         }
         this.levelState.p2Tank.setTargetDirection();
     }
 
     gameLoop = () => {
-        if (this.levelState.p1Tank.targetDirectionBase !== this.levelState.p1Tank.rotationBase) {
+        // rotation
+        if (Math.abs( this.levelState.p1Tank.targetDirectionBase - this.levelState.p1Tank.rotationBase) > Math.PI / 180) {
             this.levelState.p1Tank.adjustBaseOrientation();
         }
-        if (this.levelState.p2Tank.targetDirectionBase !== this.levelState.p2Tank.rotationBase) {
+        // rotation
+        if (Math.abs( this.levelState.p2Tank.targetDirectionBase - this.levelState.p2Tank.rotationBase) > Math.PI / 180) {
             this.levelState.p2Tank.adjustBaseOrientation();
         }
+        // movement
         if (this.levelState.p1Tank.keysPushed.length !== 0) {
             this.levelState.p1Tank.updatePosition(this.levelState.width, this.levelState.height);
         }
+        // movement
         if (this.levelState.p2Tank.keysPushed.length !== 0) {
             this.levelState.p2Tank.updatePosition(this.levelState.width, this.levelState.height);
         }
