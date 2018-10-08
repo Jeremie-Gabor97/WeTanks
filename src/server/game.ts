@@ -59,7 +59,7 @@ export class Game {
         if (clickInfo.button === 0) {
             this.levelState.bulletCount += 1;
             this.levelState.p1Tank.bulletsActive += 1;
-            this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, clone(this.levelState.p1Tank.position),
+            this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.getBulletPosition(),
                 this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));
         } else {
             this.levelState.mineCount += 1;
@@ -72,7 +72,7 @@ export class Game {
         if (clickInfo.button === 0) {
             this.levelState.bulletCount += 1;
             this.levelState.p2Tank.bulletsActive += 1;
-            this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, clone(this.levelState.p2Tank.position),
+            this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.getBulletPosition(),
                 this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
         } else {
             this.levelState.mineCount += 1;
@@ -110,6 +110,73 @@ export class Game {
         this.levelState.p2Tank.setTargetDirection();
     }
 
+    private detectCollisionTankBullet(tank: Tank, bullet: Bullet) {
+        let distance = (tank.position.x - bullet.position.x) ** 2 + (tank.position.y - bullet.position.y) ** 2;
+        if (bullet.tank === tank) {
+            // if bullet was shot by this tank
+            if ((distance < (tank.radius + bullet.radius) ** 2) && bullet.bounces === 1) {
+                // for bullet to kills its own tank, has to have bounced
+                return true;
+            }
+            return false;
+        }
+        // if bullet was shot by another tank
+        if (distance < (tank.radius + bullet.radius) ** 2) {
+            return true;
+        }
+        return false;
+    }
+
+    private resolveCollisions() {
+        // bullets bouncing of walls
+        this.levelState.bullets.forEach( bullet => {
+            bullet.resolveCollision(this.levelState.width, this.levelState.height, this.levelState.bullets);
+            if (bullet.bounces > bullet.allowedBounces) {
+                bullet.live = 0;
+            }
+        });
+        this.levelState.bullets.forEach( bullet => {
+            if (bullet.live === 0) {
+                this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );        
+            }
+        });
+
+        // check if colliding with bullets
+        if (this.levelState.p1Tank.alive === 1) {
+            for (let bullet of this.levelState.bullets) {
+                if (this.detectCollisionTankBullet(this.levelState.p1Tank, bullet)) {
+                    this.levelState.p1Tank.alive = 0;
+                    this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
+                    break;
+                }
+            }
+        }
+        if (this.levelState.p2Tank.alive === 1) {
+            for (let bullet of this.levelState.bullets) {
+                if (this.detectCollisionTankBullet(this.levelState.p2Tank, bullet)) {
+                    this.levelState.p2Tank.alive = 0;
+                    this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
+                    break;
+                }
+            }    
+        }
+        for (let tank of this.levelState.enemyTanks) {
+            for (let bullet of this.levelState.bullets) {
+                if (this.detectCollisionTankBullet(tank, bullet)) {
+                    this.levelState.enemyTanks.splice( this.levelState.enemyTanks.indexOf(tank), 1 );
+                    this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
+                    break;
+                }   
+            }
+        }
+
+        this.levelState.p1Tank.detectCollison(this.levelState.width, this.levelState.height);
+        this.levelState.p2Tank.detectCollison(this.levelState.width, this.levelState.height);
+        this.levelState.enemyTanks.forEach(tank => {
+            tank.detectCollison(this.levelState.width, this.levelState.height);
+        });
+    }
+
     gameLoop = () => {
         // rotation
         if (Math.abs( this.levelState.p1Tank.targetDirectionBase - this.levelState.p1Tank.rotationBase) > Math.PI / 180) {
@@ -130,9 +197,18 @@ export class Game {
         this.levelState.bullets.forEach(bullet => {
             bullet.updatePosition(this.levelState.width, this.levelState.height);
         });
+        this.resolveCollisions();
+        let allTanks = this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank);
+        if (this.levelState.p1Tank.alive === 0 && this.levelState.p2Tank.alive === 0) {
+            allTanks = this.levelState.enemyTanks;
+        } else if (this.levelState.p1Tank.alive === 0) {
+            allTanks = this.levelState.enemyTanks.concat(this.levelState.p2Tank);
+        } else if (this.levelState.p2Tank.alive === 0) {
+            allTanks = this.levelState.enemyTanks.concat(this.levelState.p1Tank);
+        }
         this.ioServer.emit('update',
             {
-                'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
+                'tanks': allTanks,
                 'bullets': this.levelState.bullets
             });
     }

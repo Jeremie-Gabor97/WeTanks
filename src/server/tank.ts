@@ -1,3 +1,4 @@
+import { clone } from 'lodash';
 import { Key } from 'ts-key-enum';
 
 export class Tank {
@@ -11,6 +12,8 @@ export class Tank {
     public minesActive: number;
     public keysPushed: string[];
     public allowedBounces: number;
+    public radius: number;
+    public alive: number;
 
     constructor(id: string, position: Position, rotationGun: number, rotationBase: number, type: number, allowedBounces: number) {
         this.id = id;
@@ -23,6 +26,8 @@ export class Tank {
         this.minesActive = 0;
         this.keysPushed = [];
         this.allowedBounces = allowedBounces;
+        this.radius = 16;
+        this.alive = 1;
     }
 
     private getRadians (directions: string[]) {
@@ -136,15 +141,26 @@ export class Tank {
         let distance = 1;
         this.position.x += Math.cos(this.rotationBase) * distance;
         this.position.y -= Math.sin(this.rotationBase) * distance;
-        if (this.position.x < 0) {
-            this.position.x = 0;
-        } else if (this.position.x > width) {
-            this.position.x = width;
+    }
+
+    public getBulletPosition() {
+        let distanceAway = 20;
+        let currPosition = clone(this.position);
+        currPosition.x += distanceAway * Math.cos(this.rotationGun);
+        currPosition.y -= distanceAway * Math.sin(this.rotationGun);
+        return currPosition;
+    }
+
+    public detectCollison(width: number, height: number) {
+        if (this.position.x < 16) {
+            this.position.x = 16;
+        } else if (this.position.x > width - 16) {
+            this.position.x = width - 16;
         }
-        if (this.position.y < 0) {
-            this.position.y = 0;
-        } else if (this.position.y > height) {
-            this.position.y = height;
+        if (this.position.y < 16) {
+            this.position.y = 16;
+        } else if (this.position.y > height - 16) {
+            this.position.y = height - 16;
         }
     }
 }
