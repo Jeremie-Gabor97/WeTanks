@@ -22,6 +22,7 @@ interface ITank {
     id: string;
     position: Pos;
     rotationBase: number;
+    rotationGun: number;
 }
 
 interface ITankInfo extends ITank {
@@ -66,7 +67,8 @@ const fakeUpdate: IUpdateInfo = {
                 x: 40,
                 y: 40
             },
-            rotationBase: Math.PI
+            rotationBase: Math.PI,
+            rotationGun: Math.PI
         },
         {
             id: '8',
@@ -74,7 +76,8 @@ const fakeUpdate: IUpdateInfo = {
                 x: 100,
                 y: 100
             },
-            rotationBase: -Math.PI / 2
+            rotationBase: -Math.PI / 2,
+            rotationGun: -Math.PI / 2
         }
     ],
     bullets: []
@@ -99,6 +102,7 @@ class CreepsClient {
     wallInfos: IWallInfo[];
 
     tankSprites: Dictionary<createjs.Bitmap>;
+    gunSprites: Dictionary<createjs.Bitmap>;
     bulletSprites: Dictionary<createjs.Bitmap>;
     mineSprites: Dictionary<createjs.Bitmap>;
     wallSprites: createjs.Bitmap[];
@@ -139,6 +143,7 @@ class CreepsClient {
                         y: 0
                     },
                     rotationBase: Math.PI / 4,
+                    rotationGun: Math.PI / 4,
                     type: 0
                 },
                 {
@@ -148,6 +153,7 @@ class CreepsClient {
                         y: 32
                     },
                     rotationBase: 3 * Math.PI / 4,
+                    rotationGun: 3 * Math.PI / 4,
                     type: 1
                 }
             ],
@@ -278,8 +284,11 @@ class CreepsClient {
                 this.tankInfos[id] = null;
                 delete this.tankInfos[id];
                 this.tanksContainer.removeChild(this.tankSprites[id]);
+                this.tanksContainer.removeChild(this.gunSprites[id]);
                 this.tankSprites[id] = null;
                 delete this.tankSprites[id];
+                this.gunSprites[id] = null;
+                delete this.gunSprites[id];
             }
         });
 
@@ -289,10 +298,15 @@ class CreepsClient {
             if (info) {
                 info.position = tank.position;
                 info.rotationBase = Degrees(tank.rotationBase);
+                info.rotationGun = Degrees(tank.rotationGun);
                 const sprite = this.tankSprites[tank.id];
                 sprite.x = info.position.x;
                 sprite.y = info.position.y;
                 sprite.rotation = info.rotationBase * -1;
+                const gunSprite = this.gunSprites[tank.id];
+                gunSprite.x = info.position.x;
+                gunSprite.y = info.position.y;
+                gunSprite.rotation = info.rotationGun * -1;
             }
         });
 
@@ -340,6 +354,7 @@ class CreepsClient {
         this.wallInfos = [];
 
         this.tankSprites = {};
+        this.gunSprites = {};
         this.bulletSprites = {};
         this.mineSprites = {};
         this.wallSprites = [];
@@ -357,8 +372,16 @@ class CreepsClient {
             tankSprite.x = tank.position.x;
             tankSprite.y = tank.position.y;
             tankSprite.rotation = Degrees(tank.rotationBase) * -1;
+            const gunSprite = new createjs.Bitmap(this.getGunSpriteFromType(tank.type));
+            gunSprite.regX = 5;
+            gunSprite.regY = 16;
+            gunSprite.x = tank.position.x;
+            gunSprite.y = tank.position.y;
+            gunSprite.rotation = Degrees(tank.rotationGun) * -1;
             this.tankSprites[tank.id] = tankSprite;
+            this.gunSprites[tank.id] = gunSprite;
             this.tanksContainer.addChild(tankSprite);
+            this.tanksContainer.addChild(gunSprite);
         });
 
         levelInfo.walls.forEach(wall => {
@@ -391,6 +414,19 @@ class CreepsClient {
                 return 'assets/tankRed.png';
             case 2:
                 return 'assets/tankGreen.png';
+            default:
+                return 'assets/jeremie.png';
+        }
+    }
+
+    getGunSpriteFromType(type: number) {
+        switch (type) {
+            case 0:
+                return 'assets/gunBlue.png';
+            case 1:
+                return 'assets/gunRed.png';
+            case 2:
+                return 'assets/gunGreen.png';
             default:
                 return 'assets/jeremie.png';
         }
