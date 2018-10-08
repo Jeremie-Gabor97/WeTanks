@@ -25,77 +25,117 @@ export class Tank {
         this.allowedBounces = allowedBounces;
     }
 
-    private getDegrees(direction: string) {
-        switch (direction) {
-            case Key.ArrowRight:
-                return 0;
-            case Key.ArrowLeft:
-                return 180;
-            case Key.ArrowDown:
-                return 270;
-            default:
-                return 90;
+    private getRadians (directions: string[]) {
+        if (directions.length === 0) {
+            return this.rotationBase;
         }
-    }
-
-    private getRadians (direction: string) {
-        switch (direction) {
-            case Key.ArrowRight:
-                return 0;
-            case Key.ArrowLeft:
-                return Math.PI;
-            case Key.ArrowDown:
-                return -(Math.PI / 2);
-            default:
-                return Math.PI / 2;
-        }
-    }
-
-    private degreesToRadians (degrees: number) {
-        let rad = degrees * Math.PI / 180;
-        // make sure rad value is between -pi and +pi
-        if (rad > Math.PI) {
-            return rad - 2 * Math.PI;
-        } else if (rad < -Math.PI) {
-            return rad + 2 * Math.PI;
+        if (directions.length === 1) {
+            switch (directions[0]) {
+                case Key.ArrowRight:
+                     return 0;
+                case Key.ArrowLeft:
+                    return Math.PI;
+                case Key.ArrowDown:
+                    return -(Math.PI / 2);
+                default:
+                    return Math.PI / 2;
+            }
         } else {
-            return rad;
-        }
-    }
-
-    public setTargetDirection() {
-        if (this.keysPushed.length === 0) {
-            this.targetDirectionBase = this.rotationBase;
-        } else if (this.keysPushed.length === 1) {
-            this.targetDirectionBase = this.getRadians(this.keysPushed[0]);
-        } else {
-            let firstDirection = this.getDegrees(this.keysPushed[0]);
-            let secondDirection = this.getDegrees(this.keysPushed[1]);
-            if (secondDirection - firstDirection === 180 || secondDirection - firstDirection === -180) {
-                // if diretions are opposite directions, just use latest one pushed
-                if (this.keysPushed.length > 2) {
-                    // if 3 keys or more and 1st and second are opposite, third is guaranteed not to be opposite from first
-                    this.targetDirectionBase = this.degreesToRadians((firstDirection + this.getDegrees(this.keysPushed[2])) / 2);
-                } else {
-                    // if only two keys and are opposite, just use most latest one
-                    this.targetDirectionBase = this.getRadians(this.keysPushed[0]);
-                }
-            } else {
-                // if first and second are not opposite from each other, use the first two
-                this.targetDirectionBase = this.degreesToRadians((firstDirection + secondDirection) / 2);
+            if ((directions[0] === Key.ArrowDown && directions[1] === Key.ArrowLeft) ||
+                 (directions[0] === Key.ArrowLeft && directions[1] === Key.ArrowDown)) {
+                return -( Math.PI * 3 / 4);
+            } else if ((directions[0] === Key.ArrowDown && directions[1] === Key.ArrowRight) ||
+                 (directions[0] === Key.ArrowRight && directions[1] === Key.ArrowDown)) {
+                return -( Math.PI * 1 / 4);
+            } else if ((directions[0] === Key.ArrowUp && directions[1] === Key.ArrowRight) ||
+                 (directions[0] === Key.ArrowRight && directions[1] === Key.ArrowUp)) {
+                return Math.PI / 4;
+            } else if ((directions[0] === Key.ArrowUp && directions[1] === Key.ArrowLeft) ||
+            (directions[0] === Key.ArrowLeft && directions[1] === Key.ArrowUp)) {
+                return Math.PI * 3 / 4;
             }
         }
     }
 
+    private isCompatible(firstDir: string, secondDir: string) {
+        if (firstDir === Key.ArrowLeft && secondDir === Key.ArrowRight) {
+            return false;
+        } else if (firstDir === Key.ArrowRight && secondDir === Key.ArrowLeft) {
+            return false;
+        } else if (firstDir === Key.ArrowUp && secondDir === Key.ArrowDown) {
+            return false;
+        } else if (firstDir === Key.ArrowDown && secondDir === Key.ArrowUp) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private getApplicableDirections() {
+        if (this.keysPushed.length === 0) {
+            return [];
+        }
+        let firstDirection = this.keysPushed[0];
+        let index = 1;
+        while (index < this.keysPushed.length) {
+            if (this.isCompatible(firstDirection, this.keysPushed[index])) {
+                return [firstDirection, this.keysPushed[index]];
+            }
+            index += 1;
+        }
+        return [firstDirection];
+
+    }
+
+    public setTargetDirection() {
+        let applicableDirections = this.getApplicableDirections();
+        this.targetDirectionBase = this.getRadians(applicableDirections);
+    }
+
+    private normalizeRad(radians: number) {
+        while (radians >= 2 * Math.PI || radians < 0) {
+            if (radians >= 2 * Math.PI) {
+                radians -= 2 * Math.PI;
+            } else if (radians < 0) {
+                radians += 2 * Math.PI;
+            }
+        }
+        return radians;
+    }
+
     public adjustBaseOrientation() {
-        this.rotationBase += Math.PI / 180;
+        let orientationChange = 2;
+        let normalizedRotationBase = this.normalizeRad(this.rotationBase);
+        let normalizedTargetDirectionBase = this.normalizeRad(this.targetDirectionBase);
+        if (normalizedTargetDirectionBase > normalizedRotationBase) {
+            let diff = normalizedTargetDirectionBase - normalizedRotationBase;
+            if (diff < Math.PI) {
+                this.rotationBase += orientationChange * (Math.PI / 180);        
+            } else {
+                this.rotationBase -= orientationChange * (Math.PI / 180);        
+            }
+        } else {
+            let diff = normalizedRotationBase - normalizedTargetDirectionBase;
+            if (diff < Math.PI) {
+                this.rotationBase -= orientationChange * (Math.PI / 180);        
+            } else {
+                this.rotationBase += orientationChange * (Math.PI / 180);        
+            }
+        }
+        while (this.rotationBase > Math.PI || this.rotationBase < -Math.PI) {
+            if (this.rotationBase > Math.PI) {
+                this.rotationBase -= 2 * Math.PI;
+            } else if (this.rotationBase < -Math.PI) {
+                this.rotationBase += 2 * Math.PI;
+            }
+        }
     }
 
     public updatePosition(width: number, height: number) {
         // distance travelled in one update
-        let distance =  2;
-        this.position.x = Math.cos(this.rotationBase) * distance;
-        this.position.y = Math.sin(this.rotationBase) * distance;
+        let distance = 1;
+        this.position.x += Math.cos(this.rotationBase) * distance;
+        this.position.y -= Math.sin(this.rotationBase) * distance;
         if (this.position.x < 0) {
             this.position.x = 0;
         } else if (this.position.x > width) {

@@ -19,6 +19,7 @@ export class Game {
         this.player1 = players[0]; // is a socket
         this.player2 = players[1]; // is a socket
         this.levelNum = 1;
+        this.attachSocketListeners();
     }
 
     attachSocketListeners() {
@@ -82,33 +83,39 @@ export class Game {
     }
 
     onPlayer1Key = (directionInfo: any) => {
-        if (directionInfo.isDown === true) {
-            this.levelState.p1Tank.keysPushed.unshift(directionInfo.Key);
-        } else {
-            this.levelState.p1Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
+        let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
+        if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
+            this.levelState.p1Tank.keysPushed.unshift(directionInfo.key);
+        } else if (directions.indexOf(directionInfo.key) > -1) {
+            this.levelState.p1Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.key), 1 );
         }
         this.levelState.p1Tank.setTargetDirection();
     }
 
     onPlayer2Key = (directionInfo: any) => {
-        if (directionInfo.isDown === true) {
-            this.levelState.p2Tank.keysPushed.unshift(directionInfo.Key);
-        } else {
-            this.levelState.p2Tank.keysPushed.splice( this.levelState.p1Tank.keysPushed.indexOf(directionInfo.Key), 1 );
+        let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
+        if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
+            this.levelState.p2Tank.keysPushed.unshift(directionInfo.key);
+        } else if (directions.indexOf(directionInfo.key) > -1) {
+            this.levelState.p2Tank.keysPushed.splice( this.levelState.p2Tank.keysPushed.indexOf(directionInfo.key), 1 );
         }
         this.levelState.p2Tank.setTargetDirection();
     }
 
     gameLoop = () => {
-        if (this.levelState.p1Tank.targetDirectionBase !== this.levelState.p1Tank.rotationBase) {
+        // rotation
+        if (Math.abs( this.levelState.p1Tank.targetDirectionBase - this.levelState.p1Tank.rotationBase) > Math.PI / 180) {
             this.levelState.p1Tank.adjustBaseOrientation();
         }
-        if (this.levelState.p2Tank.targetDirectionBase !== this.levelState.p2Tank.rotationBase) {
+        // rotation
+        if (Math.abs( this.levelState.p2Tank.targetDirectionBase - this.levelState.p2Tank.rotationBase) > Math.PI / 180) {
             this.levelState.p2Tank.adjustBaseOrientation();
         }
+        // movement
         if (this.levelState.p1Tank.keysPushed.length !== 0) {
             this.levelState.p1Tank.updatePosition(this.levelState.width, this.levelState.height);
         }
+        // movement
         if (this.levelState.p2Tank.keysPushed.length !== 0) {
             this.levelState.p2Tank.updatePosition(this.levelState.width, this.levelState.height);
         }
@@ -117,7 +124,7 @@ export class Game {
         });
         this.ioServer.emit('update',
             {
-                'tanks': this.levelState.enemyTanks.push(this.levelState.p1Tank, this.levelState.p2Tank),
+                'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
                 'bullets': this.levelState.bullets
             });
     }
