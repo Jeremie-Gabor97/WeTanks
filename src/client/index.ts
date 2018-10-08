@@ -347,6 +347,19 @@ class CreepsClient {
                 sprite.y = info.position.y;
                 sprite.rotation = info.rotation * -1;
             }
+            // Add new bullets
+            else {
+                bullet.rotation = Degrees(bullet.rotation);
+                this.bulletInfos[bullet.id] = bullet;
+                const bulletSprite = new createjs.Bitmap(this.getBulletSpriteFromType(bullet.type));
+                bulletSprite.regX = 6;
+                bulletSprite.regY = 4;
+                bulletSprite.x = bullet.position.x;
+                bulletSprite.y = bullet.position.y;
+                bulletSprite.rotation = bullet.rotation * -1;
+                this.bulletSprites[bullet.id] = bulletSprite;
+                this.bulletsContainer.addChild(bulletSprite);
+            }
         });
     }
 
@@ -439,6 +452,19 @@ class CreepsClient {
                 return 'assets/gunRed.png';
             case 2:
                 return 'assets/gunGreen.png';
+            default:
+                return 'assets/jeremie.png';
+        }
+    }
+
+    getBulletSpriteFromType(type: number) {
+        switch (type) {
+            case 0:
+                return 'assets/bulletBlue.png';
+            case 1:
+                return 'assets/bulletRed.png';
+            case 2:
+                return 'assets/bulletGreen.png';
             default:
                 return 'assets/jeremie.png';
         }
