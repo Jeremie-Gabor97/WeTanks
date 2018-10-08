@@ -170,16 +170,23 @@ class CreepsClient {
 
     tick = () => {
         this.stage.update();
-        if (this.frameNum === 5) {
-            this.socket.emit('rotation', this.getPlayerRotation);
+        if (this.playerId) {
+            this.socket.emit('rotation', {
+                angle: this.getPlayerRotation()
+            });
         }
         this.frameNum = (this.frameNum + 1) % 6;
     }
 
     getPlayerRotation() {
-        const mousePosition = this.mousePosition;
-        const playerPosition = this.tankInfos[this.playerId].position;
-        return Math.atan2(mousePosition.y - playerPosition.y, mousePosition.x - playerPosition.y);
+        if (this.tankInfos[this.playerId]) {
+            const mousePosition = this.mousePosition;
+            const playerPosition = this.tankInfos[this.playerId].position;
+            return Math.atan2(playerPosition.y - mousePosition.y, mousePosition.x - playerPosition.x);
+        }
+        else {
+            return 0;
+        }
     }
 
     initUi() {
@@ -240,7 +247,9 @@ class CreepsClient {
     }
 
     onClick = (e: MouseEvent) => {
-        this.socket.emit('click');
+        this.socket.emit('click', {
+            button: e.button
+        });
         // console.log('emitting clicked');
     }
 

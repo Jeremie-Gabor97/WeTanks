@@ -31,7 +31,7 @@ ioServer.on('connection', function (socket: socketIO.Socket) {
         console.log('2 players have joined');
         players[0].emit('playerId',
         { 'id': 'player1'});
-        players[1].emit('[playerId',
+        players[1].emit('playerId',
         { 'id': 'player2'});
         let game = new Game(players, ioServer);
         game.newLevel();
