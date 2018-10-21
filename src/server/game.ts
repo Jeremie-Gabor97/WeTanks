@@ -170,10 +170,11 @@ export class Game {
             }
         }
 
-        this.levelState.p1Tank.detectCollison(this.levelState.width, this.levelState.height);
-        this.levelState.p2Tank.detectCollison(this.levelState.width, this.levelState.height);
+        this.levelState.p1Tank.detectCollison(this.levelState.width, this.levelState.height, this.levelState.enemyTanks.concat(this.levelState.p2Tank));
+        this.levelState.p2Tank.detectCollison(this.levelState.width, this.levelState.height, this.levelState.enemyTanks.concat(this.levelState.p1Tank));
         this.levelState.enemyTanks.forEach(tank => {
-            tank.detectCollison(this.levelState.width, this.levelState.height);
+            tank.detectCollison(this.levelState.width, this.levelState.height,
+                 this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank));
         });
     }
 
@@ -206,6 +207,9 @@ export class Game {
         } else if (this.levelState.p2Tank.alive === 0) {
             allTanks = this.levelState.enemyTanks.concat(this.levelState.p1Tank);
         }
+        this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank).forEach( tank => {
+            tank.prevPosition = clone(tank.position);
+        });
         this.ioServer.emit('update',
             {
                 'tanks': allTanks,

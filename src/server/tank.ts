@@ -1,4 +1,6 @@
 import { clone } from 'lodash';
+import { normalize } from 'path';
+import { start } from 'repl';
 import { Key } from 'ts-key-enum';
 
 export class Tank {
@@ -14,6 +16,7 @@ export class Tank {
     public allowedBounces: number;
     public radius: number;
     public alive: number;
+    public prevPosition: Position;
 
     constructor(id: string, position: Position, rotationGun: number, rotationBase: number, type: number, allowedBounces: number) {
         this.id = id;
@@ -26,8 +29,9 @@ export class Tank {
         this.minesActive = 0;
         this.keysPushed = [];
         this.allowedBounces = allowedBounces;
-        this.radius = 16;
+        this.radius = 14; // was 16
         this.alive = 1;
+        this.prevPosition = position;
     }
 
     private getRadians (directions: string[]) {
@@ -151,7 +155,24 @@ export class Tank {
         return currPosition;
     }
 
-    public detectCollison(width: number, height: number) {
+    private normalize(vector: Vector) {
+        let length = Math.sqrt((vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2);
+        if (length > 0) {
+            vector.end.x = vector.beg.x + (vector.end.x - vector.beg.x) / length;
+            vector.end.y = vector.beg.y + (vector.end.y - vector.beg.y) / length;
+        }
+    }
+
+    private dotProduct(first: Vector, second: Vector) {
+        return (first.end.x - first.beg.x) * (second.end.x - second.beg.x)
+                 + (first.end.y - first.beg.y) * (second.end.y - second.beg.y);
+    }
+
+    private lengthSquared(vector: Vector) {
+        return (vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2;
+    }
+
+    public detectCollison(width: number, height: number, otherTanks: Tank[]) {
         if (this.position.x < 16) {
             this.position.x = 16;
         } else if (this.position.x > width - 16) {
@@ -162,6 +183,54 @@ export class Tank {
         } else if (this.position.y > height - 16) {
             this.position.y = height - 16;
         }
+        if (this.position.x === this.prevPosition.x && this.position.y === this.prevPosition.y) {
+            return;
+        }
+
+        otherTanks.forEach( tank => {
+            if (this === tank || tank.alive === 0) {
+                return;
+            }
+            let centerToCenterVector = new Vector(this.prevPosition, tank.prevPosition);
+            let movementVector = new Vector(this.prevPosition,
+                 new Position(this.position.x - (tank.position.x - tank.prevPosition.x), this.position.y - (tank.position.y - tank.prevPosition.y)));
+            let movementVectorMagnitude = Math.sqrt(this.lengthSquared(movementVector));
+            if (movementVectorMagnitude < (Math.sqrt(this.lengthSquared(centerToCenterVector)) - (this.radius + tank.radius))) {
+                return;
+            }
+            this.normalize(movementVector);
+            let D = this.dotProduct(movementVector, centerToCenterVector);
+            if (D <= 0) {
+                return;
+            }
+            let shortestDistanceSquared = this.lengthSquared(centerToCenterVector) - D ** 2;
+            if (shortestDistanceSquared > (this.radius + tank.radius) ** 2) {
+                return;
+            }
+            let T = (this.radius + tank.radius) ** 2 - shortestDistanceSquared;
+            if (T < 0) {
+                return;
+            }
+            let distanceToTravel = D - Math.sqrt(T);
+            let ratioToTravel = distanceToTravel / D;
+            if (movementVectorMagnitude < distanceToTravel) {
+                return;
+            }
+            this.position.x = this.prevPosition.x + (this.position.x - this.prevPosition.x) * ratioToTravel;
+            this.position.y = this.prevPosition.y + (this.position.y - this.prevPosition.y) * ratioToTravel;
+            tank.position.x = tank.prevPosition.x + (tank.position.x - tank.prevPosition.x) * ratioToTravel;
+            tank.position.y = tank.prevPosition.y + (tank.position.y - tank.prevPosition.y) * ratioToTravel;
+        });
+    }
+}
+
+class Vector {
+    public beg: Position;
+    public end: Position;
+
+    constructor(beg: Position, end: Position) {
+        this.beg = beg;
+        this.end = end;
     }
 }
 
