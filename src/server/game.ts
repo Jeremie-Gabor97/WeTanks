@@ -15,6 +15,7 @@ export class Game {
     private player2: socketIO.Socket;
     private levelNum: number;
     private levelState: Level;
+    private gameInterval: NodeJS.Timer;
 
     constructor(players: socketIO.Socket[], ioServer: socketIO.Server) {
         this.ioServer = ioServer;
@@ -52,7 +53,8 @@ export class Game {
         );
         console.log(this.levelState.p1Tank.id);
         console.log('setup method');
-        setInterval(this.gameLoop, 1000 / 30);
+        clearInterval(this.gameInterval);
+        this.gameInterval = setInterval(this.gameLoop, 1000 / 30);
     }
 
     onPlayer1Click = (clickInfo: any) => {
@@ -92,6 +94,11 @@ export class Game {
 
     onPlayer1Key = (directionInfo: any) => {
         let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
+        let directionsSecondary = ['s', 'a', 'd', 'w'];
+        const secondaryIndex = directionsSecondary.indexOf(directionInfo.key);
+        if (secondaryIndex >= 0) {
+            directionInfo.key = directions[secondaryIndex];
+        }
         if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
             this.levelState.p1Tank.keysPushed.unshift(directionInfo.key);
         } else if (directions.indexOf(directionInfo.key) > -1) {
@@ -102,6 +109,11 @@ export class Game {
 
     onPlayer2Key = (directionInfo: any) => {
         let directions = [Key.ArrowDown, Key.ArrowLeft, Key.ArrowRight, Key.ArrowUp];
+        let directionsSecondary = ['s', 'a', 'd', 'w'];
+        const secondaryIndex = directionsSecondary.indexOf(directionInfo.key);
+        if (secondaryIndex >= 0) {
+            directionInfo.key = directions[secondaryIndex];
+        }
         if (directionInfo.isDown === true && directions.indexOf(directionInfo.key) > -1) {
             this.levelState.p2Tank.keysPushed.unshift(directionInfo.key);
         } else if (directions.indexOf(directionInfo.key) > -1) {

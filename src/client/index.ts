@@ -262,7 +262,7 @@ class CreepsClient {
             });
 
             if (e.key === 'a') {
-                this.onUpdate(fakeUpdate);
+                // this.onUpdate(fakeUpdate);
             }
             if (e.key === 'r') {
                 this.socket.emit('reset');
