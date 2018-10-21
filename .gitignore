@@ -37,3 +37,5 @@ Thumbs.db
 # Ignore built ts files
 public/dist/**/*
 public/assets/**/*
+
+src/server/todo.txt

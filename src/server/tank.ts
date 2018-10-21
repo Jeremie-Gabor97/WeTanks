@@ -11,6 +11,7 @@ export class Tank {
     public rotationBase: number;
     public targetDirectionBase: number;
     public bulletsActive: number;
+    public allowedBulletsActive: number;
     public minesActive: number;
     public keysPushed: string[];
     public allowedBounces: number;
@@ -26,6 +27,7 @@ export class Tank {
         this.rotationBase = rotationBase;
         this.targetDirectionBase = 0;
         this.bulletsActive = 0;
+        this.allowedBulletsActive = 5;
         this.minesActive = 0;
         this.keysPushed = [];
         this.allowedBounces = allowedBounces;

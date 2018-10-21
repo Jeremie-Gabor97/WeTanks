@@ -58,7 +58,7 @@ export class Game {
     }
 
     onPlayer1Click = (clickInfo: any) => {
-        if (clickInfo.button === 0 && this.levelState.p1Tank.alive) {
+        if (clickInfo.button === 0 && this.levelState.p1Tank.alive && this.levelState.p1Tank.bulletsActive < this.levelState.p1Tank.allowedBulletsActive) {
             this.levelState.bulletCount += 1;
             this.levelState.p1Tank.bulletsActive += 1;
             this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.getBulletPosition(),
@@ -71,7 +71,7 @@ export class Game {
     }
 
     onPlayer2Click = (clickInfo: any) => {
-        if (clickInfo.button === 0 && this.levelState.p2Tank.alive) {
+        if (clickInfo.button === 0 && this.levelState.p2Tank.alive && this.levelState.p2Tank.bulletsActive < this.levelState.p2Tank.allowedBulletsActive) {
             this.levelState.bulletCount += 1;
             this.levelState.p2Tank.bulletsActive += 1;
             this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.getBulletPosition(),
@@ -144,6 +144,7 @@ export class Game {
         this.levelState.bullets.forEach( bullet => {
             bullet.resolveCollision(this.levelState.width, this.levelState.height, this.levelState.bullets);
             if (bullet.bounces > bullet.allowedBounces) {
+                bullet.tank.bulletsActive -= 1;
                 bullet.live = 0;
             }
         });

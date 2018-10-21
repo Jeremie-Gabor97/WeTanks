@@ -37,7 +37,9 @@ export class Bullet {
                 let distance = (this.position.x - bullet.position.x) ** 2 + (this.position.y - bullet.position.y) ** 2;
                 if (distance < (bullet.radius + this.radius) ** 2) {
                     this.live = 0;
+                    this.tank.bulletsActive -= 1;
                     bullet.live = 0;
+                    bullet.tank.bulletsActive -= 1;
                 }
             }
         });
