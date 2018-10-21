@@ -56,12 +56,12 @@ export class Game {
     }
 
     onPlayer1Click = (clickInfo: any) => {
-        if (clickInfo.button === 0) {
+        if (clickInfo.button === 0 && this.levelState.p1Tank.alive) {
             this.levelState.bulletCount += 1;
             this.levelState.p1Tank.bulletsActive += 1;
             this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.getBulletPosition(),
                 this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));
-        } else {
+        } else if (this.levelState.p1Tank.alive) {
             this.levelState.mineCount += 1;
             this.levelState.p1Tank.minesActive += 1;
             this.levelState.mines.push(new Mine(clone(this.levelState.p1Tank.position), this.levelState.p1Tank, String(this.levelState.mineCount)));
@@ -69,12 +69,12 @@ export class Game {
     }
 
     onPlayer2Click = (clickInfo: any) => {
-        if (clickInfo.button === 0) {
+        if (clickInfo.button === 0 && this.levelState.p2Tank.alive) {
             this.levelState.bulletCount += 1;
             this.levelState.p2Tank.bulletsActive += 1;
             this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.getBulletPosition(),
                 this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
-        } else {
+        } else if (this.levelState.p2Tank.alive) {
             this.levelState.mineCount += 1;
             this.levelState.p2Tank.minesActive += 1;
             this.levelState.mines.push(new Mine(clone(this.levelState.p2Tank.position), this.levelState.p2Tank, String(this.levelState.mineCount)));
