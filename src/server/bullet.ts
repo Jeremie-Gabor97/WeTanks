@@ -26,7 +26,7 @@ export class Bullet {
 
     public updatePosition(width: number, height: number) {
         // distance travelled in one update
-        let distance =  2;
+        let distance = 4;
         this.position.x += Math.cos(this.rotation) * distance;
         this.position.y -= Math.sin(this.rotation) * distance;
     }

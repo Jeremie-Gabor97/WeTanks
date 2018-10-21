@@ -142,7 +142,7 @@ export class Tank {
 
     public updatePosition(width: number, height: number) {
         // distance travelled in one update
-        let distance = 1;
+        let distance = 2;
         this.position.x += Math.cos(this.rotationBase) * distance;
         this.position.y -= Math.sin(this.rotationBase) * distance;
     }
