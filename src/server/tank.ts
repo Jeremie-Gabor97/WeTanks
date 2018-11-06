@@ -2,6 +2,7 @@ import { clone } from 'lodash';
 import { normalize } from 'path';
 import { start } from 'repl';
 import { Key } from 'ts-key-enum';
+import { Wall } from './wall';
 
 export class Tank {
     public id: string;
@@ -174,7 +175,8 @@ export class Tank {
         return (vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2;
     }
 
-    public detectCollison(width: number, height: number, otherTanks: Tank[]) {
+    public detectCollison(width: number, height: number, otherTanks: Tank[], walls: Wall[]) {
+        // checking wall collisions
         if (this.position.x < 16) {
             this.position.x = 16;
         } else if (this.position.x > width - 16) {
@@ -188,7 +190,7 @@ export class Tank {
         if (this.position.x === this.prevPosition.x && this.position.y === this.prevPosition.y) {
             return;
         }
-
+        // checking tank vs tank collisions (circle vs circle)
         otherTanks.forEach( tank => {
             if (this === tank || tank.alive === 0) {
                 return;
@@ -223,6 +225,143 @@ export class Tank {
             tank.position.x = tank.prevPosition.x + (tank.position.x - tank.prevPosition.x) * ratioToTravel;
             tank.position.y = tank.prevPosition.y + (tank.position.y - tank.prevPosition.y) * ratioToTravel;
         });
+
+        // checking tank vs wall collisions (square vs circle)
+        for (let wall of walls) {
+            let wallSize = 32;
+            let closestPoint = new Position(0, 0);
+            
+            // find the closest point on the square to the center of the circle (the tank)
+            if (this.position.x < wall.position.x - wallSize / 2) {
+                closestPoint.x = wall.position.x - wallSize / 2;
+            } else if (this.position.x > wall.position.x + wallSize / 2) {
+                closestPoint.x = wall.position.x + wallSize / 2;
+            } else {
+                closestPoint.x = this.position.x;
+            }
+            if (this.position.y < wall.position.y - wallSize / 2) {
+                closestPoint.y = wall.position.y - wallSize / 2;
+            } else if (this.position.y > wall.position.y + wallSize / 2) {
+                closestPoint.y = wall.position.y + wallSize / 2;
+            } else {
+                closestPoint.y = this.position.y;
+            }
+            // distance from closest point on square to center of tank
+            let distanceSquared = this.lengthSquared(new Vector(closestPoint, this.position));
+            if (distanceSquared > this.radius ** 2) {
+                continue;
+            }
+            // if distanceSquared is greater than radius squared, there is a collision
+            // variables we use often
+            let L = wall.position.x - wallSize / 2;
+            let T = wall.position.y - wallSize / 2;
+            let R = wall.position.x + wallSize / 2;
+            let B = wall.position.y + wallSize / 2;
+            let dx = this.position.x - this.prevPosition.x;
+            let dy = this.position.y - this.prevPosition.y;
+
+            // calculating intersection times with each sides plane
+            let ltime = Number.MAX_VALUE;
+            let rtime = Number.MAX_VALUE;
+            let ttime = Number.MAX_VALUE;
+            let btime = Number.MAX_VALUE;
+            if (this.prevPosition.x - this.radius < L && this.position.x + this.radius > L) {
+                ltime = ((L - this.radius) - this.prevPosition.x) / dx;
+            }
+            if (this.prevPosition.x + this.radius > R && this.position.x - this.radius < R) {
+                rtime = (this.prevPosition.x - (R + this.radius)) / -dx;
+            }
+            if (this.prevPosition.y - this.radius < T && this.position.y + this.radius > T) {
+                ttime = ((T - this.radius) - this.prevPosition.y) / dy;
+            }
+            if (this.prevPosition.y + this.radius > B && this.position.y - this.radius < B) {
+                btime = (this.prevPosition.y - (B + this.radius)) / -dy;
+            }
+
+            if (ltime >= 0.0 && ltime <= 1.0) {
+                let ly = dy * ltime + this.prevPosition.y;
+                if (ly >= T && ly <= B) {
+                   this.position.x = dx * ltime + this.prevPosition.x;
+                   this.position.y = ly;
+                   console.log('left plane collision');
+                   continue;
+                }
+            }
+            else if (rtime >= 0.0 && rtime <= 1.0) {
+                let ry = dy * rtime + this.prevPosition.y;
+                if (ry >= T && ry <= B) {
+                   this.position.x = dx * rtime + this.prevPosition.x;
+                   this.position.y = ry;
+                   console.log('right plane collision');
+                   continue;
+                }
+            }
+
+            if (ttime >= 0.0 && ttime <= 1.0) {
+                let tx = dx * ttime + this.prevPosition.x;
+                if (tx >= L && tx <= R) {
+                   this.position.x = tx;
+                   this.position.y = dy * ttime + this.prevPosition.y;
+                   console.log('top plane collision');
+                   continue;
+                }
+            }
+             else if (btime >= 0.0 && btime <= 1.0) {
+                let bx = dx * btime + this.prevPosition.x;
+                if (bx >= L && bx <= R) {
+                   this.position.x = bx;
+                   this.position.y = dy * btime + this.prevPosition.y;
+                   console.log('bottom plane collision');
+                   continue;
+                }
+            }
+
+            let cornerX = Number.MAX_VALUE;
+            let cornerY = Number.MAX_VALUE;
+            if (ltime !== Number.MAX_VALUE) {
+                cornerX = L;
+            } else if (rtime !== Number.MAX_VALUE) {
+                cornerX = R;
+            }
+            if (ttime !== Number.MAX_VALUE) {
+                cornerY = T;
+            } else if ( btime !== Number.MAX_VALUE) {
+                cornerY = B;
+            }
+            // Account for time where we dont pass over a size but we do hit its corner
+            if (cornerX !== Number.MAX_VALUE && cornerY === Number.MAX_VALUE) {
+                cornerY = dy > 0.0 ? B : T;
+            }
+            if (cornerY !== Number.MAX_VALUE && cornerX === Number.MAX_VALUE) {
+                cornerX = dx > 0.0 ? R : L;
+            }
+            let inverseRadius = 1 / this.radius;
+            let lineLength = Math.sqrt( dx * dx + dy * dy);
+            let cornerdx = cornerX - this.prevPosition.x;
+            let cornerdy = cornerY - this.prevPosition.y;
+            let cornerdist = Math.sqrt( cornerdx ** 2 + cornerdy ** 2);
+            let innerAngle = Math.acos( ( cornerdx * dx + cornerdy * dy) / (lineLength * cornerdist) );
+            let innerAngleSin = Math.sin(innerAngle);
+            let angle1Sin = innerAngleSin * cornerdist * inverseRadius;
+
+            // if the angle is too large,there cannot be an intersection
+            if (Math.abs( angle1Sin ) > 1.0) {
+                break;
+            }
+            let angle1 = Math.PI - Math.asin(angle1Sin);
+            let angle2 = Math.PI - innerAngle - angle1;
+            let intersectionDistance = this.radius * Math.sin(angle2) / innerAngleSin;
+            let time = intersectionDistance / lineLength;
+            // if time is outside the boundaries, return null.
+            if (time <= 1 || time >= 0) {
+                // solve for the intersection
+                let ix = time * dx + this.prevPosition.x;
+                let iy = time * dy + this.prevPosition.y;
+                console.log('corner collision');
+                this.position.x = ix;
+                this.position.y = iy;
+            }
+        }
     }
 }
 

@@ -39,3 +39,4 @@ public/dist/**/*
 public/assets/**/*
 
 src/server/todo.txt
+src/server/random

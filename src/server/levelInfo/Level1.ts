@@ -10,9 +10,9 @@ let level1 = new Level(
     480,
     600,
     [new Tank('brown1', new Position(400, 400), 0, 0, 2, 1)],
-    [new Wall(new Position(20, 20)), new Wall(new Position(40, 20)), new Wall(new Position(60, 20)),
-        new Wall(new Position(80, 7)), new Wall(new Position(200, 8)), new Wall(new Position(220, 9)),
-        new Wall(new Position(100, 10)), new Wall(new Position(180, 11)), new Wall(new Position(240, 12)),
-        new Wall(new Position(120, 13)), new Wall(new Position(160, 14)), new Wall(new Position(260, 15)),
-        new Wall(new Position(140, 16))]
+    [new Wall(new Position(150, 100)), new Wall(new Position(150, 132)), new Wall(new Position(150, 164)),
+        new Wall(new Position(150, 196)), new Wall(new Position(150, 128)), new Wall(new Position(150, 160)),
+        new Wall(new Position(150, 192)), new Wall(new Position(150, 224)), new Wall(new Position(150, 256)),
+        new Wall(new Position(150, 288)), new Wall(new Position(150, 320)), new Wall(new Position(150, 352)),
+        new Wall(new Position(150, 384))]
 );

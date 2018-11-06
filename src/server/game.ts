@@ -158,6 +158,7 @@ export class Game {
         if (this.levelState.p1Tank.alive === 1) {
             for (let bullet of this.levelState.bullets) {
                 if (this.detectCollisionTankBullet(this.levelState.p1Tank, bullet)) {
+                    bullet.tank.bulletsActive -= 1;
                     this.levelState.p1Tank.alive = 0;
                     this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
                     break;
@@ -167,6 +168,7 @@ export class Game {
         if (this.levelState.p2Tank.alive === 1) {
             for (let bullet of this.levelState.bullets) {
                 if (this.detectCollisionTankBullet(this.levelState.p2Tank, bullet)) {
+                    bullet.tank.bulletsActive -= 1;
                     this.levelState.p2Tank.alive = 0;
                     this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
                     break;
@@ -176,6 +178,7 @@ export class Game {
         for (let tank of this.levelState.enemyTanks) {
             for (let bullet of this.levelState.bullets) {
                 if (this.detectCollisionTankBullet(tank, bullet)) {
+                    bullet.tank.bulletsActive -= 1;
                     this.levelState.enemyTanks.splice( this.levelState.enemyTanks.indexOf(tank), 1 );
                     this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
                     break;
@@ -183,11 +186,13 @@ export class Game {
             }
         }
 
-        this.levelState.p1Tank.detectCollison(this.levelState.width, this.levelState.height, this.levelState.enemyTanks.concat(this.levelState.p2Tank));
-        this.levelState.p2Tank.detectCollison(this.levelState.width, this.levelState.height, this.levelState.enemyTanks.concat(this.levelState.p1Tank));
+        this.levelState.p1Tank.detectCollison(this.levelState.width, this.levelState.height,
+             this.levelState.enemyTanks.concat(this.levelState.p2Tank), this.levelState.wallInfo);
+        this.levelState.p2Tank.detectCollison(this.levelState.width, this.levelState.height,
+             this.levelState.enemyTanks.concat(this.levelState.p1Tank), this.levelState.wallInfo);
         this.levelState.enemyTanks.forEach(tank => {
             tank.detectCollison(this.levelState.width, this.levelState.height,
-                 this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank));
+                 this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank), this.levelState.wallInfo);
         });
     }
 
