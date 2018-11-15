@@ -2,9 +2,11 @@ import { clone } from 'lodash';
 import { normalize } from 'path';
 import { start } from 'repl';
 import { Key } from 'ts-key-enum';
-import { Wall } from './wall';
+import { Wall } from '../wall';
+import { IConstructorTankObjectInterface } from './constructorTankObjectInterface';
 
-export class Tank {
+
+export class BaseTank {
     public id: string;
     public type: number;
     public position: Position;
@@ -19,89 +21,28 @@ export class Tank {
     public radius: number;
     public alive: number;
     public prevPosition: Position;
+    public speed: number;
 
-    constructor(id: string, position: Position, rotationGun: number, rotationBase: number, type: number, allowedBounces: number) {
-        this.id = id;
-        this.type = type;
-        this.position = position;
-        this.rotationGun = rotationGun;
-        this.rotationBase = rotationBase;
-        this.targetDirectionBase = 0;
+    constructor(constructorObj: IConstructorTankObjectInterface) {
+        this.id = constructorObj.id;
+        this.type = constructorObj.type;
+        this.position = constructorObj.position;
+        this.rotationGun = constructorObj.rotationGun;
+        this.rotationBase = constructorObj.rotationBase;
+        this.targetDirectionBase = constructorObj.targetDirectionBase;
         this.bulletsActive = 0;
-        this.allowedBulletsActive = 5;
+        this.allowedBulletsActive = constructorObj.allowedBulletsActive;
         this.minesActive = 0;
         this.keysPushed = [];
-        this.allowedBounces = allowedBounces;
-        this.radius = 14; // was 16
+        this.allowedBounces = constructorObj.allowedBounces;
+        this.radius = 14;
         this.alive = 1;
-        this.prevPosition = position;
-    }
-
-    private getRadians (directions: string[]) {
-        if (directions.length === 0) {
-            return this.rotationBase;
-        }
-        if (directions.length === 1) {
-            switch (directions[0]) {
-                case Key.ArrowRight:
-                     return 0;
-                case Key.ArrowLeft:
-                    return Math.PI;
-                case Key.ArrowDown:
-                    return -(Math.PI / 2);
-                default:
-                    return Math.PI / 2;
-            }
-        } else {
-            if ((directions[0] === Key.ArrowDown && directions[1] === Key.ArrowLeft) ||
-                 (directions[0] === Key.ArrowLeft && directions[1] === Key.ArrowDown)) {
-                return -( Math.PI * 3 / 4);
-            } else if ((directions[0] === Key.ArrowDown && directions[1] === Key.ArrowRight) ||
-                 (directions[0] === Key.ArrowRight && directions[1] === Key.ArrowDown)) {
-                return -( Math.PI * 1 / 4);
-            } else if ((directions[0] === Key.ArrowUp && directions[1] === Key.ArrowRight) ||
-                 (directions[0] === Key.ArrowRight && directions[1] === Key.ArrowUp)) {
-                return Math.PI / 4;
-            } else if ((directions[0] === Key.ArrowUp && directions[1] === Key.ArrowLeft) ||
-            (directions[0] === Key.ArrowLeft && directions[1] === Key.ArrowUp)) {
-                return Math.PI * 3 / 4;
-            }
-        }
-    }
-
-    private isCompatible(firstDir: string, secondDir: string) {
-        if (firstDir === Key.ArrowLeft && secondDir === Key.ArrowRight) {
-            return false;
-        } else if (firstDir === Key.ArrowRight && secondDir === Key.ArrowLeft) {
-            return false;
-        } else if (firstDir === Key.ArrowUp && secondDir === Key.ArrowDown) {
-            return false;
-        } else if (firstDir === Key.ArrowDown && secondDir === Key.ArrowUp) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private getApplicableDirections() {
-        if (this.keysPushed.length === 0) {
-            return [];
-        }
-        let firstDirection = this.keysPushed[0];
-        let index = 1;
-        while (index < this.keysPushed.length) {
-            if (this.isCompatible(firstDirection, this.keysPushed[index])) {
-                return [firstDirection, this.keysPushed[index]];
-            }
-            index += 1;
-        }
-        return [firstDirection];
-
+        this.prevPosition = constructorObj.position;
+        this.speed = constructorObj.speed;
     }
 
     public setTargetDirection() {
-        let applicableDirections = this.getApplicableDirections();
-        this.targetDirectionBase = this.getRadians(applicableDirections);
+        // TODO
     }
 
     private normalizeRad(radians: number) {
@@ -144,10 +85,8 @@ export class Tank {
     }
 
     public updatePosition(width: number, height: number) {
-        // distance travelled in one update
-        let distance = 2;
-        this.position.x += Math.cos(this.rotationBase) * distance;
-        this.position.y -= Math.sin(this.rotationBase) * distance;
+        this.position.x += Math.cos(this.rotationBase) * this.speed;
+        this.position.y -= Math.sin(this.rotationBase) * this.speed;
     }
 
     public getBulletPosition() {
@@ -175,7 +114,7 @@ export class Tank {
         return (vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2;
     }
 
-    public detectCollison(width: number, height: number, otherTanks: Tank[], walls: Wall[], wallSize: number) {
+    public detectCollison(width: number, height: number, otherTanks: BaseTank[], walls: Wall[], wallSize: number) {
         // checking wall collisions
         if (this.position.x < 16) {
             this.position.x = 16;

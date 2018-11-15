@@ -7,7 +7,7 @@ import { levels } from './levelInfo/allLevels';
 import { level1 } from './levelInfo/Level1';
 import { Level } from './levelInfo/levelClass';
 import { Mine } from './mine';
-import { Tank } from './tank';
+import { BaseTank } from './tankInfo/baseTank';
 
 export class Game {
     private ioServer: socketIO.Server;
@@ -124,7 +124,7 @@ export class Game {
         this.levelState.p2Tank.setTargetDirection();
     }
 
-    private detectCollisionTankBullet(tank: Tank, bullet: Bullet) {
+    private detectCollisionTankBullet(tank: BaseTank, bullet: Bullet) {
         let distance = (tank.position.x - bullet.position.x) ** 2 + (tank.position.y - bullet.position.y) ** 2;
         if (bullet.tank === tank) {
             // if bullet was shot by this tank

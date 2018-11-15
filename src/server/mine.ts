@@ -1,12 +1,12 @@
-import { Position } from './tank';
-import { Tank } from './tank';
+import { Position } from './tankInfo/baseTank';
+import { BaseTank } from './tankInfo/baseTank';
 
 export class Mine {
     private position: Position;
-    private tank: Tank;
+    private tank: BaseTank;
     private id: string;
 
-    constructor(position: Position, tank: Tank, id: string) {
+    constructor(position: Position, tank: BaseTank, id: string) {
         this.position = position;
         this.tank = tank;
         this.id = id;

@@ -1,5 +1,5 @@
-import { Position } from './tank';
-import { Tank } from './tank';
+import { Position } from './tankInfo/baseTank';
+import { BaseTank } from './tankInfo/baseTank';
 import { Wall } from './wall';
 
 export class Bullet {
@@ -8,13 +8,13 @@ export class Bullet {
     public position: Position;
     public prevPosition: Position;
     private type: number;
-    public tank: Tank;
+    public tank: BaseTank;
     public bounces: number;
     public allowedBounces: number;
     public radius: number;
     public live: number;
 
-    constructor(rotation: number, position: Position, tank: Tank, type: number, id: string) {
+    constructor(rotation: number, position: Position, tank: BaseTank, type: number, id: string) {
         this.rotation = rotation;
         this.position = position;
         this.prevPosition = new Position(position.x, position.y);

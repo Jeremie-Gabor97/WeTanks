@@ -1,4 +1,4 @@
-import { Position } from './tank';
+import { Position } from './tankInfo/baseTank';
 
 export class Wall {
     position: Position;
