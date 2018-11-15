@@ -175,7 +175,7 @@ export class Tank {
         return (vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2;
     }
 
-    public detectCollison(width: number, height: number, otherTanks: Tank[], walls: Wall[]) {
+    public detectCollison(width: number, height: number, otherTanks: Tank[], walls: Wall[], wallSize: number) {
         // checking wall collisions
         if (this.position.x < 16) {
             this.position.x = 16;
@@ -228,7 +228,6 @@ export class Tank {
 
         // checking tank vs wall collisions (square vs circle)
         for (let wall of walls) {
-            let wallSize = 32;
             let closestPoint = new Position(0, 0);
             
             // find the closest point on the square to the center of the circle (the tank)
@@ -283,7 +282,6 @@ export class Tank {
                 if (ly >= T && ly <= B) {
                    this.position.x = dx * ltime + this.prevPosition.x;
                    this.position.y = ly;
-                   console.log('left plane collision');
                    continue;
                 }
             }
@@ -292,7 +290,6 @@ export class Tank {
                 if (ry >= T && ry <= B) {
                    this.position.x = dx * rtime + this.prevPosition.x;
                    this.position.y = ry;
-                   console.log('right plane collision');
                    continue;
                 }
             }
@@ -302,7 +299,6 @@ export class Tank {
                 if (tx >= L && tx <= R) {
                    this.position.x = tx;
                    this.position.y = dy * ttime + this.prevPosition.y;
-                   console.log('top plane collision');
                    continue;
                 }
             }
@@ -311,7 +307,6 @@ export class Tank {
                 if (bx >= L && bx <= R) {
                    this.position.x = bx;
                    this.position.y = dy * btime + this.prevPosition.y;
-                   console.log('bottom plane collision');
                    continue;
                 }
             }
@@ -357,7 +352,6 @@ export class Tank {
                 // solve for the intersection
                 let ix = time * dx + this.prevPosition.x;
                 let iy = time * dy + this.prevPosition.y;
-                console.log('corner collision');
                 this.position.x = ix;
                 this.position.y = iy;
             }

@@ -16,12 +16,14 @@ export class Game {
     private levelNum: number;
     private levelState: Level;
     private gameInterval: NodeJS.Timer;
+    private wallSize: number;
 
     constructor(players: socketIO.Socket[], ioServer: socketIO.Server) {
         this.ioServer = ioServer;
         this.player1 = players[0]; // is a socket
         this.player2 = players[1]; // is a socket
         this.levelNum = 1;
+        this.wallSize = 32;
         this.attachSocketListeners();
     }
 
@@ -142,7 +144,7 @@ export class Game {
     private resolveCollisions() {
         // bullets bouncing of walls
         this.levelState.bullets.forEach( bullet => {
-            bullet.resolveCollision(this.levelState.width, this.levelState.height, this.levelState.bullets);
+            bullet.resolveCollision(this.levelState.width, this.levelState.height, this.levelState.bullets, this.levelState.wallInfo, this.wallSize);
             if (bullet.bounces > bullet.allowedBounces) {
                 bullet.tank.bulletsActive -= 1;
                 bullet.live = 0;
@@ -187,12 +189,12 @@ export class Game {
         }
 
         this.levelState.p1Tank.detectCollison(this.levelState.width, this.levelState.height,
-             this.levelState.enemyTanks.concat(this.levelState.p2Tank), this.levelState.wallInfo);
+             this.levelState.enemyTanks.concat(this.levelState.p2Tank), this.levelState.wallInfo, this.wallSize);
         this.levelState.p2Tank.detectCollison(this.levelState.width, this.levelState.height,
-             this.levelState.enemyTanks.concat(this.levelState.p1Tank), this.levelState.wallInfo);
+             this.levelState.enemyTanks.concat(this.levelState.p1Tank), this.levelState.wallInfo, this.wallSize);
         this.levelState.enemyTanks.forEach(tank => {
             tank.detectCollison(this.levelState.width, this.levelState.height,
-                 this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank), this.levelState.wallInfo);
+                 this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank), this.levelState.wallInfo, this.wallSize);
         });
     }
 
