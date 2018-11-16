@@ -1,8 +1,9 @@
 import { BaseTank } from '../tankInfo/baseTank';
-import { Position } from '../tankInfo/baseTank';
+import { BrownTank } from '../tankInfo/brownTank';
 import { IConstructorTankObjectInterface } from '../tankInfo/constructorTankObjectInterface';
 import { Level } from './levelClass';
 export { level1 };
+import { Position } from '../tankInfo/baseTank';
 import { PlayerTank } from '../tankInfo/playerTank';
 import { Wall } from '../wall';
 
@@ -13,7 +14,7 @@ let level1 = new Level(
      rotationBase: 0, type: 1, allowedBounces: 1, allowedBulletsActive: 5, targetDirectionBase: 0, speed: 2}),
     480,
     600,
-    [new BaseTank({id: 'brown1', position: new Position(400, 400), rotationGun: 0,
+    [new BrownTank({id: 'brown1', position: new Position(400, 400), rotationGun: 0,
      rotationBase: 0, type: 2, allowedBounces: 1, allowedBulletsActive: 5, targetDirectionBase: 0, speed: 2})],
     [new Wall(new Position(150, 100)), new Wall(new Position(150, 132)), new Wall(new Position(150, 164)),
         new Wall(new Position(150, 196)), new Wall(new Position(150, 128)), new Wall(new Position(150, 160)),

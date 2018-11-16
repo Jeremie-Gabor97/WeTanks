@@ -62,7 +62,8 @@ export class Game {
     onPlayer1Click = (clickInfo: any) => {
         if (clickInfo.button === 0 && this.levelState.p1Tank.alive && this.levelState.p1Tank.bulletsActive < this.levelState.p1Tank.allowedBulletsActive) {
             this.levelState.bulletCount += 1;
-            this.levelState.p1Tank.bulletsActive += 1;
+            // just updates bullet count
+            this.levelState.p1Tank.shoot(this.levelState.width, this.levelState.height, []);
             this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.getBulletPosition(),
                 this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));
         } else if (this.levelState.p1Tank.alive) {
@@ -75,7 +76,8 @@ export class Game {
     onPlayer2Click = (clickInfo: any) => {
         if (clickInfo.button === 0 && this.levelState.p2Tank.alive && this.levelState.p2Tank.bulletsActive < this.levelState.p2Tank.allowedBulletsActive) {
             this.levelState.bulletCount += 1;
-            this.levelState.p2Tank.bulletsActive += 1;
+            // just updates bullet count
+            this.levelState.p2Tank.shoot(this.levelState.width, this.levelState.height, []);
             this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.getBulletPosition(),
                 this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
         } else if (this.levelState.p2Tank.alive) {
@@ -124,23 +126,6 @@ export class Game {
         this.levelState.p2Tank.setTargetDirection();
     }
 
-    private detectCollisionTankBullet(tank: BaseTank, bullet: Bullet) {
-        let distance = (tank.position.x - bullet.position.x) ** 2 + (tank.position.y - bullet.position.y) ** 2;
-        if (bullet.tank === tank) {
-            // if bullet was shot by this tank
-            if ((distance < (tank.radius + bullet.radius) ** 2) && bullet.bounces === 1) {
-                // for bullet to kills its own tank, has to have bounced
-                return true;
-            }
-            return false;
-        }
-        // if bullet was shot by another tank
-        if (distance < (tank.radius + bullet.radius) ** 2) {
-            return true;
-        }
-        return false;
-    }
-
     private resolveCollisions() {
         // bullets bouncing of walls
         this.levelState.bullets.forEach( bullet => {
@@ -159,7 +144,7 @@ export class Game {
         // check if colliding with bullets
         if (this.levelState.p1Tank.alive === 1) {
             for (let bullet of this.levelState.bullets) {
-                if (this.detectCollisionTankBullet(this.levelState.p1Tank, bullet)) {
+                if (bullet.detectCollisionTankBullet(this.levelState.p1Tank)) {
                     bullet.tank.bulletsActive -= 1;
                     this.levelState.p1Tank.alive = 0;
                     this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
@@ -169,7 +154,7 @@ export class Game {
         }
         if (this.levelState.p2Tank.alive === 1) {
             for (let bullet of this.levelState.bullets) {
-                if (this.detectCollisionTankBullet(this.levelState.p2Tank, bullet)) {
+                if (bullet.detectCollisionTankBullet(this.levelState.p2Tank)) {
                     bullet.tank.bulletsActive -= 1;
                     this.levelState.p2Tank.alive = 0;
                     this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
@@ -179,7 +164,7 @@ export class Game {
         }
         for (let tank of this.levelState.enemyTanks) {
             for (let bullet of this.levelState.bullets) {
-                if (this.detectCollisionTankBullet(tank, bullet)) {
+                if (bullet.detectCollisionTankBullet(tank)) {
                     bullet.tank.bulletsActive -= 1;
                     this.levelState.enemyTanks.splice( this.levelState.enemyTanks.indexOf(tank), 1 );
                     this.levelState.bullets.splice( this.levelState.bullets.indexOf(bullet), 1 );
@@ -199,14 +184,6 @@ export class Game {
     }
 
     gameLoop = () => {
-        // rotation
-        if (Math.abs( this.levelState.p1Tank.targetDirectionBase - this.levelState.p1Tank.rotationBase) > Math.PI / 180) {
-            this.levelState.p1Tank.adjustBaseOrientation();
-        }
-        // rotation
-        if (Math.abs( this.levelState.p2Tank.targetDirectionBase - this.levelState.p2Tank.rotationBase) > Math.PI / 180) {
-            this.levelState.p2Tank.adjustBaseOrientation();
-        }
         // movement
         if (this.levelState.p1Tank.keysPushed.length !== 0) {
             this.levelState.p1Tank.updatePosition(this.levelState.width, this.levelState.height);
@@ -215,6 +192,16 @@ export class Game {
         if (this.levelState.p2Tank.keysPushed.length !== 0) {
             this.levelState.p2Tank.updatePosition(this.levelState.width, this.levelState.height);
         }
+
+        for (let tank of this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank)) {
+            tank.adjustGunOrientation();
+        }
+
+        for (let tank of this.levelState.enemyTanks) {
+            // only shoots if applicable depending on tank type
+            tank.shoot(this.levelState.width, this.levelState.height, [this.levelState.p1Tank, this.levelState.p2Tank]);
+        }
+        
         this.levelState.bullets.forEach(bullet => {
             bullet.updatePosition(this.levelState.width, this.levelState.height);
         });

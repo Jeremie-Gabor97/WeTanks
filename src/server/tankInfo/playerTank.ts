@@ -6,6 +6,8 @@ import { IConstructorTankObjectInterface } from './constructorTankObjectInterfac
 export class PlayerTank extends BaseTank {
     constructor(constructorObj: IConstructorTankObjectInterface) { super(constructorObj); }
 
+    // takes in an array of directions and returns the corresponding direction
+    // so for eg: up right, is something like PI/2 rad
     private getRadians (directions: string[]) {
         if (directions.length === 0) {
             return this.rotationBase;
@@ -38,6 +40,7 @@ export class PlayerTank extends BaseTank {
         }
     }
 
+    // takes in to directions, eg: up, right and says if they are compatible
     private isCompatible(firstDir: string, secondDir: string) {
         if (firstDir === Key.ArrowLeft && secondDir === Key.ArrowRight) {
             return false;
@@ -52,6 +55,8 @@ export class PlayerTank extends BaseTank {
         }
     }
 
+    // for example if up and down are pushed, ony one can be applied
+    // this returns the applicable ones
     private getApplicableDirections() {
         if (this.keysPushed.length === 0) {
             return [];
@@ -68,8 +73,20 @@ export class PlayerTank extends BaseTank {
 
     }
 
+    // this is whats called if a key is pressed or released
     public setTargetDirection() {
         let applicableDirections = this.getApplicableDirections();
         this.targetDirectionBase = this.getRadians(applicableDirections);
+    }
+
+    public adjustGunOrientation() {
+        // rotation
+        if (Math.abs( this.targetDirectionBase - this.rotationBase) > Math.PI / 180) {
+            this.adjustBaseOrientation();
+        }
+    }
+
+    public shoot(width: number, height: number, enemies: BaseTank[]) {
+        this.bulletsActive += 1;
     }
 }

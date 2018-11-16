@@ -5,8 +5,7 @@ import { Key } from 'ts-key-enum';
 import { Wall } from '../wall';
 import { IConstructorTankObjectInterface } from './constructorTankObjectInterface';
 
-
-export class BaseTank {
+export abstract class BaseTank {
     public id: string;
     public type: number;
     public position: Position;
@@ -45,7 +44,7 @@ export class BaseTank {
         // TODO
     }
 
-    private normalizeRad(radians: number) {
+    public normalizeRad(radians: number) {
         while (radians >= 2 * Math.PI || radians < 0) {
             if (radians >= 2 * Math.PI) {
                 radians -= 2 * Math.PI;
@@ -55,6 +54,10 @@ export class BaseTank {
         }
         return radians;
     }
+
+    abstract adjustGunOrientation(): void;
+
+    abstract shoot(width: number, height: number, enemies: BaseTank[]): void;
 
     public adjustBaseOrientation() {
         let orientationChange = 2;
@@ -89,6 +92,7 @@ export class BaseTank {
         this.position.y -= Math.sin(this.rotationBase) * this.speed;
     }
 
+    // returns the position of the tip of the gun
     public getBulletPosition() {
         let distanceAway = 20;
         let currPosition = clone(this.position);
@@ -97,6 +101,7 @@ export class BaseTank {
         return currPosition;
     }
 
+    // sets vector length to 1
     private normalize(vector: Vector) {
         let length = Math.sqrt((vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2);
         if (length > 0) {
@@ -105,15 +110,17 @@ export class BaseTank {
         }
     }
 
-    private dotProduct(first: Vector, second: Vector) {
+    public dotProduct(first: Vector, second: Vector) {
         return (first.end.x - first.beg.x) * (second.end.x - second.beg.x)
                  + (first.end.y - first.beg.y) * (second.end.y - second.beg.y);
     }
 
-    private lengthSquared(vector: Vector) {
+    // returns the length squared of the vector
+    public lengthSquared(vector: Vector) {
         return (vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2;
     }
 
+    // detect Collision between tank and boundary wall, other thanks, block walls
     public detectCollison(width: number, height: number, otherTanks: BaseTank[], walls: Wall[], wallSize: number) {
         // checking wall collisions
         if (this.position.x < 16) {
@@ -298,7 +305,7 @@ export class BaseTank {
     }
 }
 
-class Vector {
+export class Vector {
     public beg: Position;
     public end: Position;
 

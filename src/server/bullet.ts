@@ -238,4 +238,21 @@ export class Bullet {
             }
         }
     }
+
+    public detectCollisionTankBullet(tank: BaseTank) {
+        let distance = (tank.position.x - this.position.x) ** 2 + (tank.position.y - this.position.y) ** 2;
+        if (this.tank === tank) {
+            // if bullet was shot by this tank
+            if ((distance < (tank.radius + this.radius) ** 2) && this.bounces === 1) {
+                // for bullet to kills its own tank, has to have bounced
+                return true;
+            }
+            return false;
+        }
+        // if bullet was shot by another tank
+        if (distance < (tank.radius + this.radius) ** 2) {
+            return true;
+        }
+        return false;
+    }
 }
