@@ -57,7 +57,7 @@ export abstract class BaseTank {
 
     abstract adjustGunOrientation(): void;
 
-    abstract shoot(width: number, height: number, enemies: BaseTank[]): void;
+    abstract shoot(width: number, height: number, enemies: BaseTank[], counter: number): void;
 
     public adjustBaseOrientation() {
         let orientationChange = 2;
@@ -102,7 +102,7 @@ export abstract class BaseTank {
     }
 
     // sets vector length to 1
-    private normalize(vector: Vector) {
+    public normalize(vector: Vector) {
         let length = Math.sqrt((vector.end.x - vector.beg.x) ** 2 + (vector.end.y - vector.beg.y) ** 2);
         if (length > 0) {
             vector.end.x = vector.beg.x + (vector.end.x - vector.beg.x) / length;

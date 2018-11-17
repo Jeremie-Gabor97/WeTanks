@@ -1,5 +1,6 @@
 import { clone } from 'lodash';
 import { Wall } from '../wall';
+import { Position } from './baseTank';
 import { Vector } from './baseTank';
 import { BaseTank } from './baseTank';
 import { IConstructorTankObjectInterface } from './constructorTankObjectInterface';
@@ -40,7 +41,7 @@ export class BrownTank extends BaseTank {
                 }
             }
             this.rotationGun = this.normalizeRad(this.rotationGun);
-        }
+        } 
     }
 
     // finds the point on border towards which gun is poiting
@@ -91,15 +92,61 @@ export class BrownTank extends BaseTank {
         return borderTarget;
     }
 
-    public shoot(width: number, height: number, enemies: BaseTank[]) {
-        // let gunTipPosition = this.getBulletPosition();
-        // let borderTargetPoint = this.borderTargetPoint(width, height);
-        // let gunSightVector = new Vector(gunTipPosition, borderTargetPoint);
-        // for (let tank of enemies) {
-        //     let gunToCenterOfTankVector = new Vector(gunTipPosition, tank.position);
-        //     let result = this.dotProduct(gunSightVector, gunToCenterOfTankVector);
-        //     Math.acos(this.lengthSquared())
-        //     arccos((P122 + P132 - P232) / (2 * P12 * P13))
-        // }
+    public shoot(width: number, height: number, enemies: BaseTank[], counter: number) {
+        if (counter !== 20) {
+            return false;
+        }
+        let gunTipPosition = this.getBulletPosition();
+        let borderTargetPoint = this.borderTargetPoint(width, height);
+        let gunSightVector = new Vector(gunTipPosition, clone(borderTargetPoint));
+        this.normalize(gunSightVector);
+        let bottom = gunTipPosition.y;
+        let top = borderTargetPoint.y;
+        let right = borderTargetPoint.x;
+        let left = gunTipPosition.x;
+        let closestPoint = new Position(0, 0);
+        for (let tank of enemies) {
+            if (tank.id === 'player2') {
+                continue;
+            }
+            if (tank.position.x < left) {
+                closestPoint.x = left;
+            } else if (this.position.x > right) {
+                closestPoint.x = right;
+            } else {
+                closestPoint.x = this.position.x;
+            }
+            // console.log('bottom');
+            // console.log(bottom);
+            // console.log('top');
+            // console.log(top);
+            // console.log('tank y position');
+            // console.log(tank.position.y);
+            if (tank.position.y > bottom) {
+                closestPoint.y = bottom;
+            } else if (tank.position.y < top) {
+                closestPoint.y = top;
+            } else {
+                closestPoint.y = this.position.y;
+            }
+            let distanceToTankSquared = this.lengthSquared(new Vector(closestPoint, this.position));
+            if (distanceToTankSquared > this.radius ** 2) {
+                continue;
+            }
+            let gunToCenterOfTankVector = new Vector(gunTipPosition, tank.position);
+            let distanceFromGunToPointClosestToTank = Math.abs(this.dotProduct(gunSightVector, gunToCenterOfTankVector));
+            let distanceFromTankCenterToLine = this.lengthSquared(gunToCenterOfTankVector) - distanceFromGunToPointClosestToTank ** 2;
+            // console.log('gunToCenterOfTank');
+            // console.log(Math.sqrt(this.lengthSquared(gunToCenterOfTankVector)));
+            // console.log('distance from gun to point closest to tank');
+            // console.log(distanceFromGunToPointClosestToTank);   
+            // console.log('distance from tank center to line');
+            // console.log(distanceFromTankCenterToLine);
+            if (distanceFromTankCenterToLine < tank.radius) {
+                // this.bulletsActive += 1;
+                return true;
+            }
+        }
+        return false;
     }
 }

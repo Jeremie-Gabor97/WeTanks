@@ -86,7 +86,7 @@ export class PlayerTank extends BaseTank {
         }
     }
 
-    public shoot(width: number, height: number, enemies: BaseTank[]) {
+    public shoot(width: number, height: number, enemies: BaseTank[], counter: number) {
         this.bulletsActive += 1;
     }
 }
