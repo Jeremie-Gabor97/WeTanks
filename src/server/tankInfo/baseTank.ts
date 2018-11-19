@@ -59,7 +59,7 @@ export abstract class BaseTank {
 
     abstract adjustGunOrientation(): void;
 
-    abstract shoot(width: number, height: number, enemies: BaseTank[], counter: number): void;
+    abstract shoot(width: number, height: number, enemies: BaseTank[], counter: number, walls: Wall[], wallSize: number): void;
 
     public adjustBaseOrientation() {
         let orientationChange = 2;

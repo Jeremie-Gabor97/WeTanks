@@ -91,7 +91,66 @@ export class BrownTank extends BaseTank {
         return borderTarget;
     }
 
-    public shoot(width: number, height: number, enemies: BaseTank[], counter: number) {
+    public checkLineOfSightWallCollision(gunTipPosition: Position, borderTargetPoint: Position, tankPosition: Position, wall: Wall, wallSize: number) {
+        let slope = (gunTipPosition.y - borderTargetPoint.y) / (gunTipPosition.x - borderTargetPoint.x);
+        let intercept = gunTipPosition.y - slope * gunTipPosition.x;
+        let collision = new Position(-1, -1);
+        // check top wall
+        let X = (wall.topLeft.y - intercept) / slope;
+        if (wall.topLeft.x <= X && wall.bottomRight.x >= X) {
+            collision.x = X;
+            collision.y = wall.topLeft.y;
+        }
+        // check bottom wall
+        X = (wall.bottomRight.y - intercept) / slope;
+        if (wall.topLeft.x <= X && wall.bottomRight.x >= X) {
+            if (collision.x === -1) {
+                collision.x = X;
+                collision.y = wall.bottomRight.y;
+            } else {
+                let oldDistance = this.lengthSquared(new Vector(gunTipPosition, collision));
+                let newDistance = this.lengthSquared(new Vector(gunTipPosition, new Position(X, wall.bottomRight.y)));
+                if (newDistance < oldDistance) {
+                    collision.x = X;
+                    collision.y = wall.bottomRight.y;
+                }
+            }
+        }
+        // check left wall
+        let Y = wall.topLeft.x * slope + intercept;
+        if (wall.topLeft.y <= Y && wall.bottomRight.y >= Y) {
+            if (collision.x === -1) {
+                collision.x = wall.topLeft.x;
+                collision.y = Y;
+            } else {
+                let oldDistance = this.lengthSquared(new Vector(gunTipPosition, collision));
+                let newDistance = this.lengthSquared(new Vector(gunTipPosition, new Position(wall.topLeft.x, Y)));
+                if (newDistance < oldDistance) {
+                    collision.x = wall.topLeft.x;
+                    collision.y = Y;
+                }
+            }
+        }
+        // check right wall
+        Y = wall.bottomRight.x * slope + intercept;
+        if (wall.topLeft.y <= Y && wall.bottomRight.y >= Y) {
+            if (collision.x === -1) {
+                collision.x = wall.bottomRight.x;
+                collision.y = Y;
+            } else {
+                let oldDistance = this.lengthSquared(new Vector(gunTipPosition, collision));
+                let newDistance = this.lengthSquared(new Vector(gunTipPosition, new Position(wall.bottomRight.x, Y)));
+                if (newDistance < oldDistance) {
+                    collision.x = wall.bottomRight.x;
+                    collision.y = Y;
+                }
+            }
+        }
+        return collision;
+    }
+
+    public shoot(width: number, height: number, enemies: BaseTank[], counter: number, walls: Wall[], wallSize: number) {
+        // time check for shooting
         if (counter !== 20) {
             return false;
         }
@@ -136,6 +195,21 @@ export class BrownTank extends BaseTank {
             let distanceFromTankCenterToLine = this.lengthSquared(gunToCenterOfTankVector) - distanceFromGunToPointClosestToTank ** 2;
             if (distanceFromTankCenterToLine < tank.radius) {
                 // this.bulletsActive += 1;
+                let wallInWay = false;
+                for (let wall of walls) {
+                    let collision = this.checkLineOfSightWallCollision(gunTipPosition, borderTargetPoint, tank.position, wall, wallSize);
+                    if (collision.x !== -1) {
+                        let gunTipToTankDistance = this.lengthSquared(new Vector(gunTipPosition, tank.position));
+                        let gunTipToWallDistance = this.lengthSquared(new Vector(gunTipPosition, collision));
+                        if (gunTipToWallDistance < gunTipToTankDistance) {
+                            wallInWay = true;
+                            break;
+                        }
+                    }
+                }
+                if (wallInWay) {
+                    continue;
+                }
                 return true;
             }
         }
