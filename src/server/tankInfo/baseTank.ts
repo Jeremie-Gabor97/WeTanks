@@ -21,6 +21,7 @@ export abstract class BaseTank {
     public alive: number;
     public prevPosition: Position;
     public speed: number;
+    public turretRotationSpeed: number;
 
     constructor(constructorObj: IConstructorTankObjectInterface) {
         this.id = constructorObj.id;
@@ -38,6 +39,7 @@ export abstract class BaseTank {
         this.alive = 1;
         this.prevPosition = constructorObj.position;
         this.speed = constructorObj.speed;
+        this.turretRotationSpeed = 1;
     }
 
     public setTargetDirection() {
