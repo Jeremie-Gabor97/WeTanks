@@ -59,31 +59,7 @@ interface ILevelInfo {
     walls: IWallInfo[];
 }
 
-const fakeUpdate: IUpdateInfo = {
-    tanks: [
-        {
-            id: '7',
-            position: {
-                x: 40,
-                y: 40
-            },
-            rotationBase: Math.PI,
-            rotationGun: Math.PI
-        },
-        {
-            id: '8',
-            position: {
-                x: 100,
-                y: 100
-            },
-            rotationBase: -Math.PI / 2,
-            rotationGun: -Math.PI / 2
-        }
-    ],
-    bullets: []
-};
-
-class CreepsClient {
+class TanksClient {
     stage: createjs.Stage;
     canvas: HTMLCanvasElement;
     width: number;
@@ -133,39 +109,6 @@ class CreepsClient {
         this.initUi();
 
         this.gameLoop = window.setInterval(this.tick, 1000 / this.fps);
-
-        this.onLevelStart({
-            tanks: [
-                {
-                    id: '7',
-                    position: {
-                        x: 0,
-                        y: 0
-                    },
-                    rotationBase: Math.PI / 4,
-                    rotationGun: Math.PI / 4,
-                    type: 0
-                },
-                {
-                    id: '8',
-                    position: {
-                        x: 32,
-                        y: 32
-                    },
-                    rotationBase: 3 * Math.PI / 4,
-                    rotationGun: 3 * Math.PI / 4,
-                    type: 1
-                }
-            ],
-            walls: [
-                {
-                    position: {
-                        x: 200,
-                        y: 200
-                    }
-                }
-            ]
-        });
     }
 
     tick = () => {
@@ -471,4 +414,4 @@ class CreepsClient {
     }
 }
 
-const creepsClient = new CreepsClient();
+const creepsClient = new TanksClient();

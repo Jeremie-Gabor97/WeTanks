@@ -6,7 +6,7 @@ const path = require('path');
 module.exports = {
     mode: 'development',
     devtool: 'source-map',
-    entry: './src/client/index.ts',
+    entry: './src/client/start.tsx',
 
     output: {
         path: path.resolve(__dirname, 'public/dist/client'),
@@ -17,7 +17,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: [/\.ts$/],
+                test: [/\.tsx?$/],
                 exclude: /(node_modules|bower_components)/,
                 use: [
                     {
@@ -33,7 +33,7 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.ts', '.js']
+        extensions: ['.ts', '.js','.tsx']
     },
 
     externals: {
