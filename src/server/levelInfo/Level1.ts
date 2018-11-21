@@ -13,7 +13,7 @@ let level1 = new Level(
     new PlayerTank({id: 'player2', position: new Position(100, 300), rotationGun: 0,
      rotationBase: 0, type: 1, allowedBounces: 1, allowedBulletsActive: 5, targetDirectionBase: 0, speed: 2}),
     480,
-    600,
+    608,
     [new BrownTank({id: 'brown1', position: new Position(400, 200), rotationGun: 5 * Math.PI / 4,
      rotationBase: 0, type: 2, allowedBounces: 1, allowedBulletsActive: 5, targetDirectionBase: 0, speed: 2})],
     [new Wall(new Position(150, 100)), new Wall(new Position(150, 132)), new Wall(new Position(150, 164)),

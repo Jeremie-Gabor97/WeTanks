@@ -6,7 +6,7 @@ const path = require('path');
 module.exports = {
     mode: 'development',
     devtool: 'source-map',
-    entry: './src/client/start.tsx',
+    entry: './src/client/mainScreen.tsx',
 
     output: {
         path: path.resolve(__dirname, 'public/dist/client'),
