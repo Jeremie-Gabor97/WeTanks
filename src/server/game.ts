@@ -218,7 +218,7 @@ export class Game {
                 targetInSight = tank.shoot(this.levelState.width, this.levelState.height,
                      [], this.counter, this.levelState.wallInfo, this.wallSize);
             }
-            if (targetInSight) {
+            if (targetInSight === true) {
                 this.counter = 0;
                 this.levelState.bulletCount += 1;
                 // just updates bullet count

@@ -1,0 +1,30 @@
+h1 {
+    text-align: center;
+    margin-top: 40px;
+    color: white;
+    size: 40px;
+}
+
+body {
+    height: 100%;
+    background-color: black;
+    margin: 0;
+}
+
+.MainScreen-playButtonContainer {
+    margin-top: 200px;
+    width: 100px;
+    height: 25px;
+    margin: auto;
+    background: white;
+    text-align: center;
+}
+
+.button {
+    cursor: pointer;
+    line-height: 25px;
+}
+
+.MainScreen-playButtonContainer:hover {
+	background: lightgray;
+}

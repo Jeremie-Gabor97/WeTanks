@@ -59,7 +59,7 @@ interface ILevelInfo {
     walls: IWallInfo[];
 }
 
-class TanksClient {
+class GameCanvas {
     stage: createjs.Stage;
     canvas: HTMLCanvasElement;
     width: number;
@@ -92,9 +92,9 @@ class TanksClient {
     bulletsContainer: createjs.Container;
     minesContainer: createjs.Container;
 
-    constructor() {
-        this.socket = io();
-        this.canvas = document.getElementById('theCanvas') as HTMLCanvasElement;
+    constructor(canvas: HTMLCanvasElement, socket: SocketIOClient.Socket) {
+        this.socket = socket;
+        this.canvas = canvas;
         this.width = this.canvas.clientWidth;
         this.height = this.canvas.clientHeight;
         console.log('width: ' + this.width);
@@ -414,4 +414,6 @@ class TanksClient {
     }
 }
 
-const creepsClient = new TanksClient();
+export default GameCanvas;
+
+// const creepsClient = new TanksClient();

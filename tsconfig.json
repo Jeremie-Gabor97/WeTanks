@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      "experimentalDecorators": true,
       "outDir": "./public/dist",
       "allowJs": true,
       "noImplicitAny": true,
