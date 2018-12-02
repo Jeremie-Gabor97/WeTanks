@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import MainScreen from './MainScreen';
+import App from './app';
 
 ReactDOM.render(
-    <MainScreen />,
+    <App />,
     document.getElementById('root') as HTMLElement
 );

@@ -5,13 +5,13 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as io from 'socket.io-client';
 
-import GameCanvas from './GameCanvas';
+import { ScreenType } from './app';
+import GameCanvas from './gameCanvas';
 import './gameScreen.css';
-import './GameScreen.css';
 
 export interface IGameScreenProps {
     socket: SocketIOClient.Socket;
-    // switchScreen: (type: ScreenType) => void;
+    switchScreen: (type: ScreenType) => void;
 }
 
 @observer

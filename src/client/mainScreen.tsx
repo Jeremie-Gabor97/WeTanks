@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as io from 'socket.io-client';
+import { SocketEvent } from '../contracts/socketContract';
 import { ScreenType } from './app';
 
 import './mainScreen.css';
@@ -14,12 +15,11 @@ export interface IMainScreenProps {
 }
 
 @observer
-export default class MainScreen extends React.Component<IMainScreenProps> {
+class MainScreen extends React.Component<IMainScreenProps> {
     @observable disconnected: boolean = false;
-    socket: SocketIOClient.Socket;
 
     onClickPlay = () => {
-        // TODO
+        this.props.socket.emit(SocketEvent.StartGame);
     }
 
     public render() {
@@ -37,3 +37,5 @@ export default class MainScreen extends React.Component<IMainScreenProps> {
         );
     }
 }
+
+export default MainScreen;

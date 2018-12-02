@@ -1,7 +1,6 @@
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import * as io from 'socket.io-client';
 
 // import GameLobbyScreen from './gameLobbyScreen';
@@ -57,22 +56,13 @@ class App extends React.Component<{}> {
         return (
             <div className={'App'}>
                 <div className={'App-screen'}>
-                    <img className={'background'} src={'assets/backgrounds/main.jpg'} />
                     {this.disconnected
                         ? (
                             <div className={'App-disconnected'}>
                                 {'Disconnected from the server'}
                             </div>
                         )
-                        : (
-                            <ReactCSSTransitionGroup
-                                transitionName={'swag'}
-                                transitionEnterTimeout={1000}
-                                transitionLeaveTimeout={1000}
-                            >
-                                {this.renderScreen()}
-                            </ReactCSSTransitionGroup>
-                        )
+                        : (this.renderScreen())
                     }
                 </div>
             </div >
@@ -80,4 +70,11 @@ class App extends React.Component<{}> {
     }
 }
 
+// <img className={'background'} src={'assets/backgrounds/main.jpg'} />
+// <ReactCSSTransitionGroup
+//                                transitionName={'swag'}
+//                                transitionEnterTimeout={1000}
+//                                transitionLeaveTimeout={1000}
+//                            >
+// </ReactCSSTransitionGroup>
 export default App;
