@@ -92,14 +92,14 @@ class GameCanvas {
     bulletsContainer: createjs.Container;
     minesContainer: createjs.Container;
 
-    constructor(canvas: HTMLCanvasElement, socket: SocketIOClient.Socket) {
-        this.socket = socket;
+    constructor(canvas: HTMLCanvasElement) {
+        this.socket = io();
         this.canvas = canvas;
         this.width = this.canvas.clientWidth;
         this.height = this.canvas.clientHeight;
         console.log('width: ' + this.width);
         console.log('height: ' + this.height);
-        this.stage = new createjs.Stage('theCanvas');
+        this.stage = new createjs.Stage(this.canvas);
         this.fps = 30;
         this.frameNum = 0;
         this.keyManager = new KeyManager();

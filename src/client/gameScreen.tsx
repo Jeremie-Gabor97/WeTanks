@@ -10,7 +10,6 @@ import GameCanvas from './gameCanvas';
 import './gameScreen.css';
 
 export interface IGameScreenProps {
-    socket: SocketIOClient.Socket;
     switchScreen: (type: ScreenType) => void;
 }
 
@@ -21,7 +20,7 @@ class GameScreen extends React.Component<IGameScreenProps> {
 
     componentDidMount() {
         this.attachSocketListeners();
-        this.gameCanvas = new GameCanvas(this.canvas, this.props.socket);
+        this.gameCanvas = new GameCanvas(this.canvas);
     }
 
     componentWillUnmount() {

@@ -22,15 +22,11 @@ export enum ScreenType {
 class App extends React.Component<{}> {
     @observable disconnected: boolean = false;
     @observable activeScreen: ScreenType = ScreenType.Main;
-    socket: SocketIOClient.Socket;
+    // socket: SocketIOClient.Socket;
 
     constructor(props: {}) {
         super(props);
-        this.socket = io();
-
-        this.socket.on('disconnect', () => {
-            this.disconnected = true;
-        });
+        // this.socket = io();
     }
 
     switchScreen = (type: ScreenType) => {
@@ -40,13 +36,13 @@ class App extends React.Component<{}> {
     renderScreen() {
         switch (this.activeScreen) {
             case ScreenType.Main:
-                return <MainScreen key={'main'} socket={this.socket} switchScreen={this.switchScreen} />;
+                return <MainScreen key={'main'} switchScreen={this.switchScreen} />;
             // case ScreenType.Lobby:
                // return <LobbyScreen key={'lobby'} socket={this.socket} switchScreen={this.switchScreen} />;
             // case ScreenType.GameLobby:
                // return <GameLobbyScreen key={'gameLobby'} socket={this.socket} switchScreen={this.switchScreen} />;
             case ScreenType.Game:
-                return <GameScreen key={'game'} socket={this.socket} switchScreen={this.switchScreen} />;
+                return <GameScreen key={'game'} switchScreen={this.switchScreen} />;
             default:
                 return null;
         }

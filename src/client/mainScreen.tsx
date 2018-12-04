@@ -10,7 +10,6 @@ import { ScreenType } from './app';
 import './mainScreen.css';
 
 export interface IMainScreenProps {
-    socket: SocketIOClient.Socket;
     switchScreen: (type: ScreenType) => void;
 }
 
@@ -18,22 +17,24 @@ export interface IMainScreenProps {
 class MainScreen extends React.Component<IMainScreenProps> {
     @observable disconnected: boolean = false;
 
+    attachSocketListeners() {
+        // TODO
+    }
+
     onClickPlay = () => {
-        this.props.socket.emit(SocketEvent.StartGame);
+        this.props.switchScreen(ScreenType.Game);
     }
 
     public render() {
         return (
-            <body>
             <div className={'mainScreen'}>
                 <h1>We Tanks</h1>
-                <div className={'MainScreen-playButtonContainer'}>
-                    <span className={'MainScreen-playButton button'} onClick={this.onClickPlay}>
+                <div className={'MainScreen-playButtonContainer'} onClick={this.onClickPlay}>
+                    <span className={'MainScreen-playButton button'}>
                         {'Play'}
                     </span>
                 </div>
             </div>
-            </body>        
         );
     }
 }
