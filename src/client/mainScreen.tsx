@@ -28,7 +28,9 @@ class MainScreen extends React.Component<IMainScreenProps> {
     public render() {
         return (
             <div className={'mainScreen'}>
-                <h1>We Tanks</h1>
+                <div className={'MainScreen-title'}>
+                    {'We Tanks'}
+                </div>
                 <div className={'MainScreen-playButtonContainer'} onClick={this.onClickPlay}>
                     <span className={'MainScreen-playButton button'}>
                         {'Play'}
