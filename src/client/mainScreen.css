@@ -19,12 +19,20 @@
     margin: 0;
 }
 
-.MainScreen-playButtonContainer {
+.MainScreen-playButtonContainer1Player {
     margin-top: 200px;
     width: 100px;
     height: 25px;
     margin: auto;
-     background: white;
+    background: white;
+    text-align: center;
+}
+.MainScreen-playButtonContainer2Players {
+    margin-top: 240px;
+    width: 100px;
+    height: 25px;
+    margin: auto;
+    background: white;
     text-align: center;
 }
 
@@ -33,6 +41,10 @@
     line-height: 25px;
 }
 
-.MainScreen-playButtonContainer:hover {
+.MainScreen-playButtonContainer1Player:hover {
+	background: lightgray;
+}
+
+.MainScreen-playButtonContainer2Players:hover {
 	background: lightgray;
 }

@@ -21,21 +21,33 @@ app.get('/', (req: Request, res: Response) => {
 let players: socketIO.Socket[] = [];
 
 ioServer.on('connection', function (socket: socketIO.Socket) {
-    players.push(socket);
+    // players.push(socket);
     // console.log('a user connected');
     socket.on('disconnect', function () {
         players = players.filter(obj => obj !== socket);
         console.log('user disconnected');
     });
-    if (players.length === 2) {
-        console.log('2 players have joined');
-        players[0].emit('playerId',
+
+    socket.on('joinedGame2Players', function () {
+        players.push(socket);
+        if (players.length === 2) {
+            console.log('2 players have joined');
+            players[0].emit('playerId',
+            { 'id': 'player1'});
+            players[1].emit('playerId',
+            { 'id': 'player2'});
+            let game = new Game(players, ioServer);
+            game.newLevel();
+        }
+    });
+
+    socket.on('joinedGame1Player', function () {
+        console.log('1 player has joined');
+        socket.emit('playerId',
         { 'id': 'player1'});
-        players[1].emit('playerId',
-        { 'id': 'player2'});
-        let game = new Game(players, ioServer);
+        let game = new Game([socket], ioServer);
         game.newLevel();
-    }
+    });
 });
 
 // Start the server

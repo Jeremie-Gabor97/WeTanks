@@ -17,19 +17,34 @@ export class Game {
     private levelState: Level;
     private gameInterval: NodeJS.Timer;
     private wallSize: number;
+    private numPlayers: number;
     public counter: number;
 
     constructor(players: socketIO.Socket[], ioServer: socketIO.Server) {
         this.ioServer = ioServer;
-        this.player1 = players[0]; // is a socket
-        this.player2 = players[1]; // is a socket
+        if (players.length === 1) {
+            this.numPlayers = 1;
+            this.player1 = players[0]; // is a socket    
+            this.attachSocketListeners1Player();
+        } else {
+            this.numPlayers = 2;
+            this.player1 = players[0]; // is a socket
+            this.player2 = players[1]; // is a socket    
+            this.attachSocketListeners2Players();
+        }
         this.levelNum = 1;
         this.wallSize = 32;
-        this.attachSocketListeners();
         this.counter = 20;
     }
 
-    attachSocketListeners() {
+    attachSocketListeners1Player() {
+        this.player1.on('key', this.onPlayer1Key);
+        this.player1.on('rotation', this.onPlayer1Rotation);
+        this.player1.on('click', this.onPlayer1Click);
+        this.player1.on('reset', this.reset);
+    }
+
+    attachSocketListeners2Players() {
         this.player1.on('key', this.onPlayer1Key);
         this.player1.on('rotation', this.onPlayer1Rotation);
         this.player1.on('click', this.onPlayer1Click);
@@ -47,6 +62,9 @@ export class Game {
     public newLevel(): void {
         // Pre game set up if we want
         this.levelState = cloneDeep(levels[this.levelNum - 1]);
+        if (this.numPlayers === 1) {
+            this.levelState.p2Tank.alive = 0;
+        }
         this.ioServer.emit('levelStart',
             {
                 'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
@@ -55,7 +73,6 @@ export class Game {
                 'width': this.levelState.width
             }
         );
-        console.log(this.levelState.p1Tank.id);
         console.log('setup method');
         clearInterval(this.gameInterval);
         this.gameInterval = setInterval(this.gameLoop, 1000 / 30);
@@ -186,6 +203,13 @@ export class Game {
     }
 
     gameLoop = () => {
+        // check if both players dead
+        if (this.levelState.p1Tank.alive === 0 && this.levelState.p2Tank.alive === 0) {
+            console.log('both dead');
+            clearInterval(this.gameInterval);
+            this.ioServer.emit('gameEnded');
+            console.log('right after');
+        }
         // movement
         if (this.levelState.p1Tank.keysPushed.length !== 0) {
             this.levelState.p1Tank.updatePosition(this.levelState.width, this.levelState.height);

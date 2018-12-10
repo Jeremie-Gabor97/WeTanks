@@ -4,12 +4,14 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as io from 'socket.io-client';
+import { Player } from './app';
 
 import { ScreenType } from './app';
 import GameCanvas from './gameCanvas';
 import './gameScreen.css';
 
 export interface IGameScreenProps {
+    player: Player;
     switchScreen: (type: ScreenType) => void;
 }
 
@@ -20,7 +22,7 @@ class GameScreen extends React.Component<IGameScreenProps> {
 
     componentDidMount() {
         this.attachSocketListeners();
-        this.gameCanvas = new GameCanvas(this.canvas);
+        this.gameCanvas = new GameCanvas(this.canvas, this.props.player);
     }
 
     componentWillUnmount() {
@@ -30,13 +32,19 @@ class GameScreen extends React.Component<IGameScreenProps> {
     }
 
     attachSocketListeners() {
+        // this.props.socket.on('gameEnded', this.gameEnd);
         // this.props.socket.on(SocketEvent.LobbyUpdate, this.onLobbyUpdate);
         // this.props.socket.on(SocketEvent.ReceiveChat, this.onReceiveChat);
     }
 
     removeSocketListeners() {
+        // this.props.socket.removeEventListener('gameEnded', this.gameEnd);
         // this.props.socket.removeEventListener(SocketEvent.LobbyUpdate, this.onLobbyUpdate);
         // this.props.socket.removeEventListener(SocketEvent.ReceiveChat, this.onReceiveChat);
+    }
+
+    gameEnd() {
+        this.props.switchScreen(ScreenType.Main);
     }
 
     public render() {

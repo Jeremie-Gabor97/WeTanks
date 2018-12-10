@@ -6,10 +6,12 @@ import * as ReactDOM from 'react-dom';
 import * as io from 'socket.io-client';
 import { SocketEvent } from '../contracts/socketContract';
 import { ScreenType } from './app';
+import { Player } from './app';
 
 import './mainScreen.css';
 
 export interface IMainScreenProps {
+    player: Player;
     switchScreen: (type: ScreenType) => void;
 }
 
@@ -21,7 +23,13 @@ class MainScreen extends React.Component<IMainScreenProps> {
         // TODO
     }
 
-    onClickPlay = () => {
+    onClickPlay1Player = () => {
+        this.props.player.numberOfPlayers = 1;
+        this.props.switchScreen(ScreenType.Game);
+    }
+
+    onClickPlay2Players = () => {
+        this.props.player.numberOfPlayers = 2;
         this.props.switchScreen(ScreenType.Game);
     }
 
@@ -31,9 +39,14 @@ class MainScreen extends React.Component<IMainScreenProps> {
                 <div className={'MainScreen-title'}>
                     {'We Tanks'}
                 </div>
-                <div className={'MainScreen-playButtonContainer'} onClick={this.onClickPlay}>
-                    <span className={'MainScreen-playButton button'}>
-                        {'Play'}
+                <div className={'MainScreen-playButtonContainer1Player'} onClick={this.onClickPlay1Player}>
+                    <span className={'MainScreen-playButton1Player button'}>
+                        {'Play: 1 Player'}
+                    </span>
+                </div>
+                <div className={'MainScreen-playButtonContainer2Players'} onClick={this.onClickPlay2Players}>
+                    <span className={'MainScreen-playButton2Players button'}>
+                        {'Play: 2 Players'}
                     </span>
                 </div>
             </div>

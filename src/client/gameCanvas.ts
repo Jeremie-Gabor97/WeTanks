@@ -6,6 +6,7 @@
 // keep track of list of players and bullets to determine when one dies
 // when one dies play explosion animation at that location...
 import { throttle } from 'lodash';
+import { Player } from './app';
 import KeyManager from './keys';
 import { Degrees } from './utils';
 
@@ -92,8 +93,13 @@ class GameCanvas {
     bulletsContainer: createjs.Container;
     minesContainer: createjs.Container;
 
-    constructor(canvas: HTMLCanvasElement) {
-        this.socket = io();
+    constructor(canvas: HTMLCanvasElement, player: Player) {
+        this.socket = player.socket;
+        if (player.numberOfPlayers === 1) {
+            this.socket.emit('joinedGame1Player');    
+        } else {
+            this.socket.emit('joinedGame2Players');
+        }
         this.canvas = canvas;
         this.width = this.canvas.clientWidth;
         this.height = this.canvas.clientHeight;
