@@ -1,6 +1,6 @@
-import { Position } from './tankInfo/baseTank';
-import { BaseTank } from './tankInfo/baseTank';
-import { Wall } from './wall';
+import { Position } from '../tankInfo/baseTank';
+import { BaseTank } from '../tankInfo/baseTank';
+import { Wall } from '../wall';
 
 export class Bullet {
     private id: string;

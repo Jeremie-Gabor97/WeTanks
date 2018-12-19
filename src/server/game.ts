@@ -2,7 +2,7 @@ import { clone } from 'lodash';
 import { cloneDeep } from 'lodash';
 import * as socketIO from 'socket.io';
 import { Key } from 'ts-key-enum';
-import { Bullet } from './bullet';
+import { Bullet } from './bulletInfo/bullet';
 import { levels } from './levelInfo/allLevels';
 import { level1 } from './levelInfo/Level1';
 import { Level } from './levelInfo/levelClass';
@@ -18,7 +18,6 @@ export class Game {
     private gameInterval: NodeJS.Timer;
     private wallSize: number;
     private numPlayers: number;
-    public counter: number;
 
     constructor(players: socketIO.Socket[], ioServer: socketIO.Server) {
         this.ioServer = ioServer;
@@ -34,7 +33,6 @@ export class Game {
         }
         this.levelNum = 1;
         this.wallSize = 32;
-        this.counter = 20;
     }
 
     attachSocketListeners1Player() {
@@ -64,15 +62,24 @@ export class Game {
         this.levelState = cloneDeep(levels[this.levelNum - 1]);
         if (this.numPlayers === 1) {
             this.levelState.p2Tank.alive = 0;
+            this.ioServer.emit('levelStart',
+                {
+                    'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank),
+                    'walls': this.levelState.wallInfo,
+                    'height': this.levelState.height,
+                    'width': this.levelState.width
+                }
+            );
+        } else {
+            this.ioServer.emit('levelStart',
+                {
+                    'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
+                    'walls': this.levelState.wallInfo,
+                    'height': this.levelState.height,
+                    'width': this.levelState.width
+                }
+            );    
         }
-        this.ioServer.emit('levelStart',
-            {
-                'tanks': this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank),
-                'walls': this.levelState.wallInfo,
-                'height': this.levelState.height,
-                'width': this.levelState.width
-            }
-        );
         console.log('setup method');
         clearInterval(this.gameInterval);
         this.gameInterval = setInterval(this.gameLoop, 1000 / 30);
@@ -82,7 +89,7 @@ export class Game {
         if (clickInfo.button === 0 && this.levelState.p1Tank.alive && this.levelState.p1Tank.bulletsActive < this.levelState.p1Tank.allowedBulletsActive) {
             this.levelState.bulletCount += 1;
             // just updates bullet count
-            this.levelState.p1Tank.shoot(this.levelState.width, this.levelState.height, [], 0, this.levelState.wallInfo, this.wallSize);
+            this.levelState.p1Tank.shoot(this.levelState.width, this.levelState.height, [], this.levelState.wallInfo, this.wallSize);
             this.levelState.bullets.push(new Bullet(this.levelState.p1Tank.rotationGun, this.levelState.p1Tank.getBulletPosition(),
                 this.levelState.p1Tank, 0, String(this.levelState.bulletCount)));
         } else if (this.levelState.p1Tank.alive) {
@@ -96,7 +103,7 @@ export class Game {
         if (clickInfo.button === 0 && this.levelState.p2Tank.alive && this.levelState.p2Tank.bulletsActive < this.levelState.p2Tank.allowedBulletsActive) {
             this.levelState.bulletCount += 1;
             // just updates bullet count
-            this.levelState.p2Tank.shoot(this.levelState.width, this.levelState.height, [], 0, this.levelState.wallInfo, this.wallSize);
+            this.levelState.p2Tank.shoot(this.levelState.width, this.levelState.height, [], this.levelState.wallInfo, this.wallSize);
             this.levelState.bullets.push(new Bullet(this.levelState.p2Tank.rotationGun, this.levelState.p2Tank.getBulletPosition(),
                 this.levelState.p2Tank, 0, String(this.levelState.bulletCount)));
         } else if (this.levelState.p2Tank.alive) {
@@ -222,29 +229,28 @@ export class Game {
         for (let tank of this.levelState.enemyTanks.concat(this.levelState.p1Tank, this.levelState.p2Tank)) {
             tank.adjustGunOrientation();
         }
-        if (this.counter !== 20) {
-            this.counter += 1;
-        }
         for (let tank of this.levelState.enemyTanks) {
             // only shoots if applicable depending on tank type
-            let targetInSight = tank.shoot(this.levelState.width, this.levelState.height,
-                 [this.levelState.p1Tank, this.levelState.p2Tank], this.counter, this.levelState.wallInfo, this.wallSize);
+            let targetInSight = false;
+            if (tank.bulletsActive >= tank.allowedBulletsActive) {
+                continue;
+            }
             if (this.levelState.p1Tank.alive === 1 && this.levelState.p2Tank.alive === 1) {
                 targetInSight = tank.shoot(this.levelState.width, this.levelState.height,
-                     [this.levelState.p1Tank, this.levelState.p2Tank], this.counter, this.levelState.wallInfo, this.wallSize);
+                     [this.levelState.p1Tank, this.levelState.p2Tank], this.levelState.wallInfo, this.wallSize);
             } else if (this.levelState.p1Tank.alive === 1) {
                 targetInSight = tank.shoot(this.levelState.width, this.levelState.height,
-                     [this.levelState.p1Tank], this.counter, this.levelState.wallInfo, this.wallSize);
+                     [this.levelState.p1Tank], this.levelState.wallInfo, this.wallSize);
             } else if (this.levelState.p2Tank.alive === 1) {
                 targetInSight = tank.shoot(this.levelState.width, this.levelState.height,
-                     [this.levelState.p2Tank], this.counter, this.levelState.wallInfo, this.wallSize);
+                     [this.levelState.p2Tank], this.levelState.wallInfo, this.wallSize);
             } else {
                 targetInSight = tank.shoot(this.levelState.width, this.levelState.height,
-                     [], this.counter, this.levelState.wallInfo, this.wallSize);
+                     [], this.levelState.wallInfo, this.wallSize);
             }
             if (targetInSight === true) {
-                this.counter = 0;
                 this.levelState.bulletCount += 1;
+                tank.bulletsActive += 1;
                 // just updates bullet count
                 this.levelState.bullets.push(new Bullet(tank.rotationGun, tank.getBulletPosition(),
                     tank, 0, String(this.levelState.bulletCount)));

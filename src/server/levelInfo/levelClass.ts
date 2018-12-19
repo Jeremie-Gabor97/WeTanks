@@ -1,4 +1,4 @@
-import { Bullet } from '../bullet';
+import { Bullet } from '../bulletInfo/bullet';
 import { Mine } from '../mine';
 import { Position } from '../tankInfo/baseTank';
 import { BaseTank } from '../tankInfo/baseTank';

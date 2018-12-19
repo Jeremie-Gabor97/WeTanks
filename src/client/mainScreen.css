@@ -26,12 +26,11 @@
     margin: auto;
     background: white;
     text-align: center;
+    margin-bottom: 30px;
 }
 .MainScreen-playButtonContainer2Players {
-    margin-top: 240px;
     width: 100px;
     height: 25px;
-    margin: auto;
     background: white;
     text-align: center;
 }
